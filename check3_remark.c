@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <dirent.h>
 
-void init(char *); void bfs(char *, char *); void dfs(char *, char *); void dfs_print(int, char *); char *strrev(char *);
+void init(char *); void dfs(char *, char *); void dfs_print(int, char *); char *strrev(char *);
 char wd[BUFSIZ];// 시작 경로, name에 찾고자 할 디렉터리명 저장할 배열
 
 int main(int argc, char *argv[]){ // argv[1] => 크기를 구하고 싶은 디렉토리의 경로 또는 이름
