@@ -25,9 +25,10 @@ typedef struct Stack{
 char* getDirName(char*);
 void printDir(char*, char*);
 void fileSize(int, char**);
-int tree(int, char**);
+void init(char *);
+int selectmod(char*);
 
-void init(char *); 
+void bfs(char *, char *);
 void dfs(char *, char *); 
 void dfs_print(int, char *); 
 char *strrev(char *);
