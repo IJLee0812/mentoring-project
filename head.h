@@ -26,7 +26,7 @@ char* getDirName(char*);
 void printDir(char*, char*);
 void fileSize(int, char**);
 void init(char *);
-int selectmod(char*);
+void selectmod(char*);
 
 void bfs(char *, char *);
 void dfs(char *, char *); 
