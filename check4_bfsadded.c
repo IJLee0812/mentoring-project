@@ -8,11 +8,12 @@
 
 #define MAX 1000
 
-void init(char *); int selectmod(char *); void bfs(char *, char *); int checkdir(char *); void dfs(char *, char *); void dfs_print(int, char *); char *strrev(char *); 
+void init(char *); void selectmod(char *); void bfs(char *, char *); int checkdir(char *); void dfs(char *, char *); void dfs_print(int, char *); char *strrev(char *); 
 char wd[MAX];// 시작 경로, name에 찾고자 할 디렉터리명 저장할 배열
 
 typedef struct{
-	char Nname[MAX]; // 노드. 디렉터리 경로 저장
+	char Nname[MAX]; // 디렉터리 경로 저장
+	// int size; // 용량 저장
 }Node;
 
 int main(int argc, char *argv[]){ 
@@ -29,7 +30,7 @@ void init(char *name){ // 탐색할 디렉터리 이름(또는 경로), 탐색 �
 	return;
 }
 
-int selectmod(char *argv){
+void selectmod(char *argv){
 	int mod; printf("모드 선택 (0 : bfs, 1 : dfs) : "); scanf("%d", &mod); // bfs, dfs 모드 선택
 	
 	if (mod == 0){
