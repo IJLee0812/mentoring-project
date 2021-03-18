@@ -5,7 +5,6 @@ char wd[MAX];
 /*익준*/
 typedef struct{
 	char Nname[MAX]; // 디렉터리 경로 저장
-	// int size; // 용량 저장
 }Node;
 
 void init(char *name){ // 탐색할 디렉터리 이름(또는 경로), 탐색 시작 절대경로(프로그램 위치)출력
