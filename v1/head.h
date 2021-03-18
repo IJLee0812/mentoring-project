@@ -12,20 +12,10 @@
 #define MAX 1000
 
 typedef struct{
-	char Nname[MAX]; // 디렉터리 경로 저장
-}Node;
-
-typedef struct{
-	DIR *dirp;
-	char name[MAX];
+	DIR *dp;
+	char Nname[MAX];
 	struct Node* next;
 }Node;
-
-typedef struct {
-	DIR *dp;
-	char name[MAX];
-	struct NODE * next;
-}NODE;
 
 typedef struct{
 	char (*pathptr)[STR_MAX];
