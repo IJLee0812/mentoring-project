@@ -14,9 +14,6 @@ int main(int argc, char *argv[]){
 	scanf("%d",&BD);
 
 	if((BD==0)||(BD==1)){
-		//익준
-		init(argv[1]); 
-		selectmod(argv[1]);
 		//준호
 		if(BD==0)
 			fileSize_bfs(argc,argv);
@@ -31,5 +28,9 @@ int main(int argc, char *argv[]){
 	}
 	else
 		printf("Selcect Again\n");
+	
+	//익준
+	init(argv[1]); 
+	selectmod(argv[1]);
 
 }
