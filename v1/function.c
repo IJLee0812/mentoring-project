@@ -8,12 +8,6 @@ typedef struct{
 	// int size; // 용량 저장
 }Node;
 
-int main(int argc, char *argv[]){ 
-	init(argv[1]); 
-	selectmod(argv[1]);
-	return 0;
-}
-
 void init(char *name){ // 탐색할 디렉터리 이름(또는 경로), 탐색 시작 절대경로(프로그램 위치)출력
 	printf("탐색할 디렉터리 이름(경로) : %s\n", name);
 	getcwd(wd, BUFSIZ); // 프로그램 위치를 불러오기 위해 사용, wd에 저장
