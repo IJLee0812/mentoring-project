@@ -2,7 +2,7 @@
 
 char wd[MAX];
 
-/*익준*/
+/*익준: tree*/
 
 /* 
 	#함수 설명 : 탐색할 디렉터리 이름(또는 경로), 탐색 시작 절대경로(프로그램 위치)를 출력하기 위한 함수이다.
@@ -12,8 +12,7 @@ char wd[MAX];
 void init(char *name){ // 탐색할 디렉터리 이름(또는 경로), 탐색 시작 절대경로(프로그램 위치)출력
 	printf("탐색할 디렉터리 이름(경로) : %s\n", name);
 	getcwd(wd, BUFSIZ); // 프로그램 위치를 불러오기 위해 사용, wd에 저장
-	printf("프로그램 위치(절대경로) : %s\n", wd); 
-	printf("\n");
+	//printf("프로그램 위치(절대경로) : %s\n", wd); 
 	return;
 }
 
@@ -22,41 +21,40 @@ void init(char *name){ // 탐색할 디렉터리 이름(또는 경로), 탐색 �
 	#변수 : char *argv - 찾을 디렉터리명(경로)
 	#리턴값 : void
 */
-void selectmod(char *argv){
-	int mod; printf("모드 선택 (0 : bfs, 1 : dfs) : "); scanf("%d", &mod); // bfs, dfs 모드 선택
+void selectmod(char *argv, int mod){
 	
 	if (mod == 0){
 		if (strncmp("/", argv, 1) == 0) // 절대 경로로 입력했을 경우
-			bfs(argv, "..");
+			Bfs_for_SearchTree(argv, "..");
 		else if (strncmp("..", argv, 2) == 0) // ../dirname의 경우
 			if ((strcmp("..", argv) == 0) || (strcmp("../", argv) == 0))
-				dfs_print(0, "..");
+				Dfs_for_PrintTree(0, "..");
 			else
-				bfs(argv, "..");
+				Bfs_for_SearchTree(argv, "..");
 		else if (strncmp(".", argv, 1) == 0) // . 입력했을 경우(프로그램 위치한 디렉터리) 탐색X, 출력
 			if ((strcmp(".", argv) == 0) || (strcmp("./", argv) == 0))
-				dfs_print(0, ".");
+				Dfs_for_PrintTree(0, ".");
 			else
-				bfs(argv, ".");
+				Bfs_for_SearchTree(argv, ".");
 		else // dirname 또는 상대경로로 입력했을 경우
-			bfs(argv, ".");
+			Bfs_for_SearchTree(argv, ".");
 	}
 	
 	else if (mod == 1){
 		if (strncmp("/", argv, 1) == 0) // 절대 경로로 입력했을 경우
-			dfs(argv, "..");
+			Dfs_for_SearchTree(argv, "..");
 		else if (strncmp("..", argv, 2) == 0) // ../dirname의 경우
 			if ((strcmp("..", argv) == 0) || (strcmp("../", argv) == 0))
-				dfs_print(0, "..");
+				Dfs_for_PrintTree(0, "..");
 			else
-				dfs(argv, "..");
+				Dfs_for_SearchTree(argv, "..");
 		else if (strncmp(".", argv, 1) == 0) // . 입력했을 경우(프로그램 위치한 디렉터리) 탐색X, 출력
 			if ((strcmp(".", argv) == 0) || (strcmp("./", argv) == 0))
-				dfs_print(0, ".");
+				Dfs_for_PrintTree(0, ".");
 			else
-				dfs(argv, ".");
+				Dfs_for_SearchTree(argv, ".");
 		else // dirname 또는 상대경로로 입력했을 경우
-			dfs(argv, ".");
+			Dfs_for_SearchTree(argv, ".");
 	}
 }
 
@@ -65,7 +63,7 @@ void selectmod(char *argv){
 	#변수 : char *name, char *wd - 찾을 디렉터리명(경로), 탐색하기 시작할 디렉터리명(경로)
 	#리턴값 : void
 */
-void bfs(char *name, char *wd){ 
+void Bfs_for_SearchTree(char *name, char *wd){ 
 	struct dirent *entry; struct stat buf; DIR *dp;
 	NODE queue[MAX]; int front, rear; front = rear = -1; // 큐 생성
 	
@@ -92,13 +90,13 @@ void bfs(char *name, char *wd){
 				if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) // ".", ".."은 고려하지 않음
 					continue;
 				
-				printf("탐색된 디렉터리 : %s\n", entry->d_name); 
+				//printf("탐색된 디렉터리 : %s\n", entry->d_name); 
 				
 				if (strncmp(strrev(name), strrev(entry->d_name), strlen(entry->d_name)) == 0){ // <입력한 이름(경로) == 탐색한 디렉터리명>인 경우					
 					strrev(name); strrev(entry->d_name);   
 					printf("\n%s----\n", entry->d_name); // 입력한(경로의) 디렉터리명 출력
-					dfs_print(0, entry->d_name); // dfs_print함수 호출
-					closedir(dp); return; // 반복문 탈출, bfs함수 종료
+					Dfs_for_PrintTree(0, entry->d_name); // Dfs_for_PrintTree함수 호출
+					closedir(dp); return; // 반복문 탈출, Bfs_for_SearchTree함수 종료
 				}
 				
 				else{
@@ -109,10 +107,10 @@ void bfs(char *name, char *wd){
 				strcat(path, "/");
 				strcat(path, entry->d_name);
 				
-				if (checkdir(path)){ // 탐색 중인 디렉터리가 하위 디렉터리를 보유한 경우
+				if (havedir(path)){ // 탐색 중인 디렉터리가 하위 디렉터리를 보유한 경우
 					rear++; // 저장할 공간 확보
 					strcpy(queue[rear].Nname, path);// 대상 디렉터리 경로 저장
-					printf("Queue에 %s 디렉터리 정보(경로) 저장\n", entry->d_name);
+					//printf("Queue에 %s 디렉터리 정보(경로) 저장\n", entry->d_name);
 				}
 				
 				chdir("..");
@@ -120,7 +118,7 @@ void bfs(char *name, char *wd){
 		}
 		// 같은 깊이의 모든 노드들의 탐색이 끝난 경우
 		front++;
-		printf("%s 디렉터리로 이동\n", queue[front].Nname); // 선입선출, 비었으면 함수 종료
+		//printf("%s 디렉터리로 이동\n", queue[front].Nname); // 선입선출, 비었으면 함수 종료
 		closedir(dp); chdir(queue[front].Nname);
 		
 		if ((dp = opendir(queue[front].Nname)) == NULL){ // Dequeue한 디렉터리로 이동
@@ -136,7 +134,7 @@ void bfs(char *name, char *wd){
 	#변수 : char *path - 검사할 디렉터리 경로
 	#리턴값 : 0 (하위 디렉터리가 없을 경우), 1 (하위 디렉터리가 있을 경우)
 */
-int checkdir(char *path){ // 하위 디렉터리 보유 여부 체크 함수
+int havedir(char *path){ // 하위 디렉터리 보유 여부 체크 함수
 	struct dirent *entry; struct stat buf; DIR *dp;
 	
 	chdir(path); dp = opendir(path);
@@ -151,14 +149,14 @@ int checkdir(char *path){ // 하위 디렉터리 보유 여부 체크 함수
 			
 			if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
 				continue;
-			printf("탐색된 디렉터리는 하위 디렉터리 존재\n");
+			//printf("탐색된 디렉터리는 하위 디렉터리 존재\n");
 			closedir(dp);
 			return 1; // 1 반환, if문 True
 		
 		}
 	}
 	
-	printf("탐색된 디렉터리는 하위 디렉터리 존재 X\n");
+	//printf("탐색된 디렉터리는 하위 디렉터리 존재 X\n");
 	closedir(dp);
 	return 0; // 0 반환, if문 False
 }
@@ -168,7 +166,7 @@ int checkdir(char *path){ // 하위 디렉터리 보유 여부 체크 함수
 	#변수 : char *name, char *wd - 찾을 디렉터리명(경로), 탐색하기 시작할 디렉터리명(경로)
 	#리턴값 : void 
 */
-void dfs(char *name, char *wd){ // 입력한 디렉터리를 찾는 함수, dfs 알고리즘
+void Dfs_for_SearchTree(char *name, char *wd){ // 입력한 디렉터리를 찾는 함수, dfs 알고리즘
 	struct dirent *entry; struct stat buf; DIR *dp; 
 	
 	if (chdir(wd) < 0){ // 디렉터리 이동, 실패 시 프로그램 종료
@@ -193,15 +191,15 @@ void dfs(char *name, char *wd){ // 입력한 디렉터리를 찾는 함수, dfs 
 			if (strncmp(strrev(name), strrev(entry->d_name), strlen(entry->d_name)) == 0){ // <입력한 이름(경로) == 탐색한 디렉터리명>인 경우
 				strrev(name); strrev(entry->d_name); // 비교 위해 뒤집은 문자열 원상태로 복구
 				printf("%s----\n", entry->d_name); // 입력한(경로의) 디렉터리명 출력
-				dfs_print(0, entry->d_name); // dfs_print함수 호출
-				chdir(".."); closedir(dp); return; // dfs 함수 종료
+				Dfs_for_PrintTree(0, entry->d_name); // Dfs_for_PrintTree함수 호출
+				chdir(".."); closedir(dp); return; // Dfs_for_SearchTree 함수 종료
 			}
 			
 			else{
 				strrev(name); strrev(entry->d_name); // 비교 위해 뒤집은 문자열 원상태로 복구
 			}
 			
-			dfs(name, entry->d_name); // 없을 경우, 재귀 호출(더 하위 디렉터리로 이동)
+			Dfs_for_SearchTree(name, entry->d_name); // 없을 경우, 재귀 호출(더 하위 디렉터리로 이동)
 		}
 	} 
 	
@@ -213,7 +211,7 @@ void dfs(char *name, char *wd){ // 입력한 디렉터리를 찾는 함수, dfs 
 	#변수 : int tmp, char *wd - depth 구분하기 위한 정수, 트리 구조를 출력할 디렉터리
 	#리턴값 : void
 */
-void dfs_print(int tmp, char *wd){ // 디렉터리를 트리구조로 출력하는 함수, dfs 알고리즘
+void Dfs_for_PrintTree(int tmp, char *wd){ // 디렉터리를 트리구조로 출력하는 함수, dfs 알고리즘
 	struct dirent *entry; struct stat buf; DIR *dp; int count = 0;
 	
 	count = tmp; // \t 횟수 구분(깊이 동일한 노드들 같은 열에 출력하기 위함)
@@ -252,7 +250,7 @@ void dfs_print(int tmp, char *wd){ // 디렉터리를 트리구조로 출력하�
 			for (int i = 0 ; i <= count ; i++) printf("\t");
 			printf("-%s----\n", entry->d_name); // (하위)디렉터리명 출력
 			tmp = count + 1;
-			dfs_print(tmp, entry->d_name); // 재귀 호출 (더 하위 디렉터리로 이동)
+			Dfs_for_PrintTree(tmp, entry->d_name); // 재귀 호출 (더 하위 디렉터리로 이동)
 			
 			for (int i = 0 ; i < 3 ; i++){ // 위와 동일
 				for (int j = 0 ; j <= count ; j++)
@@ -280,7 +278,7 @@ char *strrev(char *str){ // (문자열 뒤집는 함수(string.h_strrev는 리�
 
 
 
-/*준호*/
+/*준호: size*/
 
 /*
 	#함수 설명 : 경로를 받아서 절대경로로 바꿔준다.
@@ -315,11 +313,14 @@ char* absolute(char* path){
 					i++;
 				}
 			}
-			strcat(absPath,"/");
-			strcat(absPath,strbuf);
+			if (strcmp(strbuf,"")){
+				strcat(absPath,"/");
+				strcat(absPath,strbuf);
+			}
 		}
 	}
 
+	//printf("absPath: %s\n", absPath);
 	return absPath;
 }
 
@@ -330,26 +331,37 @@ char* absolute(char* path){
 			int BD - BFS/DFS 선택지 (BFS:0, DFS:1)
 	#리턴값 : void
    */
-void dfs_or_bfs (char* absPath,int BD){
+void bfs_or_dfs (char* absPath,int BD){
 
 	int totalSize = 0;
 	
 	if(BD==0)
-		totalSize = dfs_for_dirsize(absPath);
+		totalSize = Bfs_for_Size(absPath);
 	else if(BD==1)
-		totalSize = bfs_for_dirsize(absPath);
+		totalSize = Dfs_for_Size(absPath);
 	else
 		perror("Error : unexpected value of valiable \"BD\"!!\n");
 
-	printf("<<total : %d>>\n",totalSize);
+	printf("Total : %d\n",totalSize);
 }
+
+/*
+void printSt(Stack* s){
+	NODE* horse = s->top;
+	while(horse!=NULL){
+		printf("horse->Nname: %s\n", horse->Nname);
+		printf("horse->size: %d\n", s->size);
+		horse=horse->next;
+	}
+}
+*/
 
 /*
 	#함수 설명 : 해당 디렉토리 내의 모든 파일크기를 DFS로 탐색하여 총합을 리턴
 	#변수 : char* absPath - 크기를 구할 디렉토리의 절대 경로
 	#리턴값 : 해당 디렉토리 내의 모든 파일크기 합
 */
-int dfs_for_dirsize(char* absPath){
+int Dfs_for_Size(char* absPath){
 	struct stat stbuf;
 	int totalSize = 0;
 
@@ -375,7 +387,11 @@ int dfs_for_dirsize(char* absPath){
 		(하위 디렉토리를 다 읽었을 때)
 	 */
 	while(st.size){										//모든 디렉토리가 스택에서 pop되면 종료
+		//printf("st.top->Nname: %s, st.size: %d\n", st.top->Nname, st.size);
 		if((dir=readdir(st.top->dp))!=NULL){
+			if (strncmp(dir->d_name,".",1)==0){ //
+				continue; //
+			} //
 			if(strcmp(dir->d_name,".")!=0&&strcmp(dir->d_name,"..")!=0){
 
 			/*탐색 디렉토리 문자열 처리*/
@@ -387,16 +403,18 @@ int dfs_for_dirsize(char* absPath){
             stat(absPath,&stbuf);	//탐색 디렉토리 정보 불러오기
 
             if((stbuf.st_mode&0xF000)==0x8000){		//dir이 파일일 경우
+				printf("File\n");
 				totalSize += stbuf.st_size;
              }
-            else									//dir이 디렉토리일 경우
+            else{									//dir이 디렉토리일 경우
+				printf("Dir\n");
                push(&st,initNODE(opendir(absPath),absPath,NULL));
+			}
 			}
 
 		}
 		else											//dir이 NULL일 경우
-			/*top을 이전에 읽던 디렉토리로 변경*/
-        	pop(&st);
+        	pop(&st); /*top을 이전에 읽던 디렉토리로 변경*/
 	}
 
 	return totalSize;
@@ -414,6 +432,7 @@ void push(Stack *s, NODE* n){
 	s->top = n;
     s->top->next = tmp;
 	s->size++;
+	//printf("Push! %s\n", s->top->Nname);
 }
 
 /*
@@ -441,7 +460,7 @@ void pop(Stack *s){
 
    tmp = s->top;
    s->top = s->top->next;
-
+	//printf("Pop! %s\n\n", tmp->Nname);
    free(tmp);
    s->size--;
 }
@@ -452,7 +471,7 @@ void pop(Stack *s){
 	#리턴값 : 해당 디렉토리 내의 모든 파일크기 합
 	
 */
-int bfs_for_dirsize(char* absPath){
+int Bfs_for_Size(char* absPath){
 	struct stat stbuf;
 	int totalSize = 0;
 	DIR *dirp;
@@ -462,7 +481,7 @@ int bfs_for_dirsize(char* absPath){
 	struct dirent *dir;
 
 	/*queue에 시작 디렉토리 경로 추가*/
-	enqueue(&Q,absPath);
+	enqueue_for_Size(&Q,absPath);
 
 	if((dirp=opendir(absPath))==NULL){
 		printf("Error : fail on open directory!\n");
@@ -494,13 +513,13 @@ int bfs_for_dirsize(char* absPath){
 				totalSize += stbuf.st_size;
              }
             else									//dir이 디렉토리일 경우
-               	enqueue(&Q,absPath);
+               	enqueue_for_Size(&Q,absPath);
 			}
 
 		}
       	else{										//dp가 NULL일 경우
 			/*front갱신 후 디렉토리 변경*/
-    		dequeue(&Q);
+    		dequeue_for_Size(&Q);
 			dirp=opendir(Q.pathptr[Q.front]);
 		}
 	}
@@ -509,15 +528,15 @@ int bfs_for_dirsize(char* absPath){
 }
 
 /*
-	#함수 설명 : 큐의 rear에 노드를 enqueue한다, 큐가 가득찼으면 용량을 키운다.
+	#함수 설명 : 큐의 rear에 노드를 enqueue_for_Size한다, 큐가 가득찼으면 용량을 키운다.
 	#변수 : Queue *q - 경로를 집어넣을 큐, 
 			char* newpath - 큐에 들어갈 문자열의 포인터
 	#리턴값 : void
 */
-void enqueue(Queue *q, char* newpath){
+void enqueue_for_Size(Queue *q, char* newpath){
 
 	if(isFull(q))
-	   expandCapacity(q);
+	   expand_Capacity(q);
 
 	q->rear = (q->rear+1)%q->capacity;
 	strcpy(q->pathptr[q->rear],newpath);
@@ -525,11 +544,11 @@ void enqueue(Queue *q, char* newpath){
 }
 
 /*
-	#함수 설명 : 큐의 front 노드를 dequeue한다.
+	#함수 설명 : 큐의 front 노드를 dequeue_for_Size한다.
 	#변수 : Queue *q - front를 내보낼 큐의 포인터
 	#리턴값 : void
 */
-void dequeue(Queue *q){
+void dequeue_for_Size(Queue *q){
 
 	if(isEmpty(q->rear-q->front+1)){
 		printf("queue is already empty!!\n");
@@ -556,7 +575,7 @@ _Bool isFull(Queue * q){
 	#변수 : Queue *q - 용량을 증가시킬 큐
 	#리턴값 : void
 */
-void expandCapacity(Queue* q){
+void expand_Capacity(Queue* q){
 	char (*tmp)[STR_MAX] = (char(*)[STR_MAX])malloc(sizeof(char)*STR_MAX*q->capacity*2);
 
 	for(int i=0; i<q->capacity; i++){
@@ -571,7 +590,7 @@ void expandCapacity(Queue* q){
 	q->capacity *= 2;
 }
 
-/*지우*/
+/*지우: path*/
 /* 
    isEmpty 
 	# 사용: enQ, deQ, BFS(while시작)
@@ -583,10 +602,10 @@ _Bool isEmpty(int qSize){
 
 
 /* 
-   enQue
+   enQue_for_Path
 	# 사용: BFS(firstNODE, S_ISDIR)
  */
-void enQue(QUE* q, struct NODE* newnode){
+void enQue_for_Path(QUE* q, struct NODE* newnode){
 	
 	if (isEmpty(q->qSize)){ //q가 비어있는 경우
 		q->front = q->rear = newnode; //q의 front와 rear를 newnode로 일치
@@ -602,10 +621,10 @@ void enQue(QUE* q, struct NODE* newnode){
 
 
 /* 
-   deQue 
+   deQue_for_Path 
     # 사용: BFS(while끝)
  */
-void deQue(QUE* q){
+void deQue_for_Path(QUE* q){
 
 	if (isEmpty(q->qSize)){ //q가 비어있는 경우(deQ 불가능)
 		fprintf(stderr,"delete error: QisEmpty\n");
@@ -640,19 +659,19 @@ struct NODE* create_NODE(DIR* dp, char* Nname){
 
 
 /* 
-   BFS_for_Path
+   Bfs_for_Path
 	# 인자: toFind - 찾을 파일 또는 디렉터리의 이름 / workDir - 탐색 시작 경로
 	# 결과: 찾은 경우, 그 경로를 출력함 / 못 찾은 경우, 아무 것도 출력하지 않음
 	# 방식: 큐를 활용해 넓이 우선 탐색
 	# 사용: before_Search(끝) 
  */
-void BFS_for_Path(char* toFind, char* workDir){
+void Bfs_for_Path(char* toFind, char* workDir){
 
 	//prepare
 	struct dirent *dir = NULL;
 	QUE q = {NULL, NULL, 0};
 	struct NODE* firstNODE = create_NODE(NULL, workDir); //탐색 시작 경로를 firstNODE로 만들어 enQ
-	enQue(&q, firstNODE);
+	enQue_for_Path(&q, firstNODE);
 	if ((q.front->dp = opendir(workDir))==NULL){
 		perror("Error Occurred!\n");
 		exit(1);
@@ -687,25 +706,25 @@ void BFS_for_Path(char* toFind, char* workDir){
 			
 			if (S_ISDIR(statbuf.st_mode)){ //dir이면 enQ(추후에 탐색)
 				struct NODE* n = create_NODE(opendir(tmp),tmp);
-				enQue(&q,n);
+				enQue_for_Path(&q,n);
 			}
 		
 		}
 		closedir(q.front->dp);
-		deQue(&q); //q의 front를 deQ (새로운 q의 front를 탐색하기 위해)
+		deQue_for_Path(&q); //q의 front를 deQ (새로운 q의 front를 탐색하기 위해)
 	}
 }
 
 
 
 /*
-	DFS_for_Path
+	Dfs_for_Path
 	# 인자: toFind - 찾을 파일 또는 디렉터리의 이름 / workDir - 탐색 시작 경로
 	# 결과: 찾은 경우, 그 경로를 출력함 / 못 찾은 경우, 아무 것도 출력하지 않음
 	# 방식: 재귀를 활용해 깊이 우선 탐색
 	# 사용: before_Search(끝)
  */
-void DFS_for_Path(char* toFind, char* workDir) {
+void Dfs_for_Path(char* toFind, char* workDir) {
 
 	//prepare
 	DIR* dp = NULL;
@@ -726,7 +745,7 @@ void DFS_for_Path(char* toFind, char* workDir) {
 			closedir(dp);
 			return; //재귀를 활용했기 때문에 break가 아닌 return
 		}
-	
+
 		//pass
 		if ((strncmp(dir->d_name,".",1)==0)){ //.과 ..그리고 .으로 시작하는 파일(숨김파일 등)은 모두 건너뜀
 			continue;
@@ -743,7 +762,7 @@ void DFS_for_Path(char* toFind, char* workDir) {
 		}
 
 		if (S_ISDIR(statbuf.st_mode)){ //dir이면 recurse(탐색)
-			DFS_for_Path(toFind, tmp);
+			Dfs_for_Path(toFind, tmp);
 		}
 	}
 
@@ -841,13 +860,13 @@ void before_Search(char* argv, char* toFind, int BD){
 	}
 	
 	//Search
+	printf("탐색할 디렉터리 이름(경로) : %s\n", argv);
 	if (BD==0){
-		printf("BFS Search\n");
-		BFS_for_Path(toFind, workDir);
+		Bfs_for_Path(toFind, workDir);
 	}
 	else{
-		printf("DFS Search\n");
-		DFS_for_Path(toFind,workDir);
+		Dfs_for_Path(toFind,workDir);
 	}
 
 }
+
