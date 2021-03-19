@@ -4,6 +4,11 @@ char wd[MAX];
 
 /*익준*/
 
+/* 
+	#함수 설명 : 탐색할 디렉터리 이름(또는 경로), 탐색 시작 절대경로(프로그램 위치)를 출력하기 위한 함수이다.
+	#변수 : char *name - 찾을 디렉터리명(경로)
+	#리턴값 : void
+*/
 void init(char *name){ // 탐색할 디렉터리 이름(또는 경로), 탐색 시작 절대경로(프로그램 위치)출력
 	printf("탐색할 디렉터리 이름(경로) : %s\n", name);
 	getcwd(wd, BUFSIZ); // 프로그램 위치를 불러오기 위해 사용, wd에 저장
@@ -12,6 +17,11 @@ void init(char *name){ // 탐색할 디렉터리 이름(또는 경로), 탐색 �
 	return;
 }
 
+/* 
+	#함수 설명 : BFS/DFS 둘 중 하나를 선택하게 하는 기능을 위한 함수이다.
+	#변수 : char *argv - 찾을 디렉터리명(경로)
+	#리턴값 : void
+*/
 void selectmod(char *argv){
 	int mod; printf("모드 선택 (0 : bfs, 1 : dfs) : "); scanf("%d", &mod); // bfs, dfs 모드 선택
 	
@@ -19,7 +29,10 @@ void selectmod(char *argv){
 		if (strncmp("/", argv, 1) == 0) // 절대 경로로 입력했을 경우
 			bfs(argv, "..");
 		else if (strncmp("..", argv, 2) == 0) // ../dirname의 경우
-			bfs(argv, "..");
+			if (strcmp("..", argv, 2) == 0)
+				dfs_print(0, "..");
+			else
+				bfs(argv, "..");
 		else if (strcmp(".", argv) == 0) // . 입력했을 경우(프로그램 위치한 디렉터리) 탐색X, 출력
 			dfs_print(0, ".");
 		else // dirname 또는 상대경로로 입력했을 경우
@@ -30,7 +43,10 @@ void selectmod(char *argv){
 		if (strncmp("/", argv, 1) == 0) // 절대 경로로 입력했을 경우
 			dfs(argv, "..");
 		else if (strncmp("..", argv, 2) == 0) // ../dirname의 경우
-			dfs(argv, "..");
+			if (strcmp("..", argv, 2) == 0)
+				dfs_print(0, "..");
+			else
+				dfs(argv, "..");
 		else if (strcmp(".", argv) == 0) // . 입력했을 경우(프로그램 위치한 디렉터리) 탐색X, 출력
 			dfs_print(0, ".");
 		else // dirname 또는 상대경로로 입력했을 경우
@@ -38,6 +54,11 @@ void selectmod(char *argv){
 	}
 }
 
+/* 
+	#함수 설명 : BFS 알고리즘으로 찾고자 하는 디렉터리를 탐색하는 함수이다. 
+	#변수 : char *name, char *wd - 찾을 디렉터리명(경로), 탐색하기 시작할 디렉터리명(경로)
+	#리턴값 : void
+*/
 void bfs(char *name, char *wd){ 
 	struct dirent *entry; struct stat buf; DIR *dp;
 	Node queue[MAX]; int front, rear; front = rear = -1; // 큐 생성
@@ -104,6 +125,11 @@ void bfs(char *name, char *wd){
 	return;
 }
 
+/* 
+	#함수 설명 : 인자로 받은 경로, 즉 디렉터리가 하위 디렉터리를 가지는지 검사하는 함수이다. 
+	#변수 : char *path - 검사할 디렉터리 경로
+	#리턴값 : 0 (하위 디렉터리가 없을 경우), 1 (하위 디렉터리가 있을 경우)
+*/
 int checkdir(char *path){ // 하위 디렉터리 보유 여부 체크 함수
 	struct dirent *entry; struct stat buf; DIR *dp;
 	
@@ -131,6 +157,11 @@ int checkdir(char *path){ // 하위 디렉터리 보유 여부 체크 함수
 	return 0; // 0 반환, if문 False
 }
 
+/* 
+	#함수 설명 : DFS 알고리즘으로 찾고자 하는 디렉터리를 탐색하는 함수이다.
+	#변수 : char *name, char *wd - 찾을 디렉터리명(경로), 탐색하기 시작할 디렉터리명(경로)
+	#리턴값 : void 
+*/
 void dfs(char *name, char *wd){ // 입력한 디렉터리를 찾는 함수, dfs 알고리즘
 	struct dirent *entry; struct stat buf; DIR *dp; 
 	
@@ -171,6 +202,11 @@ void dfs(char *name, char *wd){ // 입력한 디렉터리를 찾는 함수, dfs 
 	chdir(".."); closedir(dp); // 백트래킹(부모 디렉터리로 올라감)
 }
 
+/* 
+	#함수 설명 : DFS 알고리즘으로 찾은 디렉터리의 하위 파일과 디렉터리들을 트리 구조로 출력하는 함수이다. (BFS 방식은 트리 구조를 출력하는 것이 까다롭기 때문에 DFS 방식으로 만듬)
+	#변수 : int tmp, char *wd - depth 구분하기 위한 정수, 트리 구조를 출력할 디렉터리
+	#리턴값 : void
+*/
 void dfs_print(int tmp, char *wd){ // 디렉터리를 트리구조로 출력하는 함수, dfs 알고리즘
 	struct dirent *entry; struct stat buf; DIR *dp; int count = 0;
 	
@@ -224,7 +260,7 @@ void dfs_print(int tmp, char *wd){ // 디렉터리를 트리구조로 출력하�
 	chdir(".."); closedir(dp); // 백트래킹(부모 디렉터리로 올라감)
 }
 
-char *strrev(char *str){ // 문자열 뒤집는 함수(string.h_strrev는 리눅스 사용 불가)
+char *strrev(char *str){ // (문자열 뒤집는 함수(string.h_strrev는 리눅스 사용 불가))
 	char *p1, *p2;
 	if (!str || !*str)
 		return str;
