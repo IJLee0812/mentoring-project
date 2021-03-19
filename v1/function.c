@@ -251,7 +251,7 @@ void fileSize_dfs(int argc, char* argv[]){
 	int intbuf;
 
 	Stack st={NULL,0};
-	struct dirent *dp;
+	struct dirent *direntp;
 	char absPath[MAX]={};
 	char strbuf[MAX]={};
 
@@ -293,23 +293,23 @@ void fileSize_dfs(int argc, char* argv[]){
 	/*stack에 argv[1] dirp 추가 */
 	push(&st,initNode(NULL,"",NULL));
 
-	if((st.top->dirp=opendir(absPath))==NULL){
+	if((st.top->dp=opendir(absPath))==NULL){
 		printf("Error : fail on open directory!\n");
 		exit(1);
 	}
-   	strcpy(st.top->name,absPath);
+   	strcpy(st.top->Nname,absPath);
 
 
 	/*전체 탐색 알고리즘*/
 	while(st.size){										//모든 디렉토리가 스택에서 pop되면 종료
-		if((dp=readdir(st.top->dirp))!=NULL){
-			if(strcmp(dp->d_name,".")!=0&&strcmp(dp->d_name,"..")!=0){
+		if((direntp=readdir(st.top->dp))!=NULL){
+			if(strcmp(direntp->d_name,".")!=0&&strcmp(direntp->d_name,"..")!=0){
 
 			/*탐색 디렉토리 문자열 처리*/
             strcpy(absPath, st.top->name);
 			if(absPath[strlen(absPath)-1]!='/')
 	            strcat(absPath,"/");
-            strcat(absPath,dp->d_name);
+            strcat(absPath,direntp->d_name);
 
             stat(absPath,&stbuf);	//탐색 디렉토리 정보 불러오기
 
@@ -348,11 +348,11 @@ void push(Stack *s, Node* n){
 	#변수 : DIR* newDirp, char* newName, Node* newNext -새로운 노드의 정보들
 	#리턴값 : 새로 동적할당해 값을 대입한 Node*
 */
-Node* initNode(DIR* newDirp, char* newName, Node* newNext){
+Node* initNode(DIR* newDp, char* newName, Node* newNext){
 	Node* new = (Node*)malloc(sizeof(Node));
 
-	new->dirp = newDirp;
-	strcpy(new->name, newName);
+	new->dp = newDp;
+	strcpy(new->Nname, newName);
 	new->next = newNext;
 
 	return new;
