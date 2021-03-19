@@ -552,20 +552,37 @@ void expandCapacity(Queue* q){
 
 /*지우*/
 /*NODE && QUE*/
-
 //Node
 typedef struct NODE{
 	DIR* dp;
-	char name[MAX];
+	char name[MAX]; 
 	struct NODE * next;
 }NODE;
-
 //Queue
 typedef struct Queue{
 	struct NODE* front;
 	struct NODE* rear;
 	int qSize;
 }QUE;
+
+
+
+/*functions*/
+//BFS
+_Bool isEmpty(int);
+void enQue(QUE*, struct NODE*);
+void deQue(QUE*);
+struct NODE* createNode(DIR* dp, char* name);
+void printQ(QUE*);
+void dirBFS(char* toFind, char* workDir);
+//DFS
+void dirDFS(char*, char*);
+//CO
+char* getDirName(char*);
+char* parents(char*);
+void printDir(char*, char*, int);
+
+
 
 /* isEmpty: qSize를 통해 q가 비어있는지 확인한다. (비어있으면 리턴true) */
 
@@ -670,7 +687,6 @@ void dirBFS(char* toFind, char* workDir){
 			//check
 			if (strcmp(dir->d_name, toFind)==0){
 				printf("[ Path: %s/%s ]\n", q.front->name, dir->d_name);
-				closedir(q.front->dp);
 				break;
 			}
 
@@ -695,6 +711,7 @@ void dirBFS(char* toFind, char* workDir){
 			}
 		
 		}
+		closedir(q.front->dp);
 		deQue(&q); //q의 front를 deQ
 	}
 }
@@ -744,7 +761,10 @@ void dirDFS(char* toFind, char* workDir) {
 		if (S_ISDIR(statbuf.st_mode)){ //dir이면 recurse
 			dirDFS(toFind, tmp);
 		}
+
 	}
+
+	closedir(dp);
 }
 
 
@@ -818,8 +838,9 @@ void printDir(char* argv, char* toFind, int BD){
 		return;	
 	}
 
+
 	//Branching
-	if ((strcmp(".", argv) == 0)&&(strlen(argv)==2)){ //탐색x (.)
+	if (strcmp(argv,".") == 0){ //탐색x (.) //수정!
 		getcwd(workDir,MAX);
 		printf("[ Path: %s ]\n", workDir);
 		return;
