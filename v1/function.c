@@ -418,7 +418,7 @@ int fileSize_bfs(char* absPath){
 		#dp가 NULL일 때 : 현재 front에 있는 디렉토리를 dequeque하고 다음 front 디렉토리를 읽기시작
 		(하위 디렉토리를 다 읽었을 때)
 	 */
-	while(!isEmpty(&Q)){
+	while(!isEmpty(Q.rear-Q.front+1)){
 		if((dir=readdir(dirp))!=NULL){		//다음 dp로 이동
 			if(strcmp(dir->d_name,".")!=0&&strcmp(dir->d_name,"..")!=0){
 
@@ -472,25 +472,12 @@ void enqueue(Queue *q, char* newpath){
 */
 void dequeue(Queue *q){
 
-	if(isEmpty(q)){
+	if(isEmpty(q->rear-q->front+1)){
 		printf("queue is already empty!!\n");
 		return;
 	}
 
 	q->front = (q->front+1)%q->capacity;
-}
-
-/*
-	#함수 설명 : 큐가 비어있으면 1 리턴
-	#변수 : Queue *q - 확인할 큐
-	#리턴값 : void
-*/
-_Bool isEmpty(Queue *q){
-
-	if(q->front == (q->rear+1)%q->capacity)
-		return 1;
-	else
-		return 0;
 }
 
 /*
