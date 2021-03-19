@@ -239,23 +239,6 @@ char *strrev(char *str){ // 문자열 뒤집는 함수(string.h_strrev는 리눅
 
 
 /*준호*/
-typedef struct Queue{		//방향 front->rear
-	char (*pathptr)[STR_MAX];
-	int front;
-	int rear;
-	int capacity;
-}Queue;
-
-typedef struct Node{
-	DIR *dirp;			//검색 진행상황 저장
-	char name[MAX];		//현재 경로를 위해
-	struct Node* next;
-}Node;
-
-typedef struct Stack{
-	Node* top;
-	int size;
-}Stack;
 
 /*
 	#함수 설명 : 크기를 구하고 싶은 디렉토리를 argv를 통해 받아 출력한다.
