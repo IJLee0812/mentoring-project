@@ -549,180 +549,140 @@ void expandCapacity(Queue* q){
 }
 
 /*지우*/
-/*NODE && QUE*/
-//Node
-typedef struct NODE{
-	DIR* dp;
-	char name[MAX]; 
-	struct NODE * next;
-}NODE;
-//Queue
-typedef struct Queue{
-	struct NODE* front;
-	struct NODE* rear;
-	int qSize;
-}QUE;
-
-
-
-/*functions*/
-//BFS
-_Bool isEmpty(int);
-void enQue(QUE*, struct NODE*);
-void deQue(QUE*);
-struct NODE* createNode(DIR* dp, char* name);
-void printQ(QUE*);
-void dirBFS(char* toFind, char* workDir);
-//DFS
-void dirDFS(char*, char*);
-//CO
-char* getDirName(char*);
-char* parents(char*);
-void printDir(char*, char*, int);
-
-
-
-/* isEmpty: qSize를 통해 q가 비어있는지 확인한다. (비어있으면 리턴true) */
-
+/* 
+   isEmpty 
+	# 사용: enQ, deQ, BFS(while시작)
+ */
 _Bool isEmpty(int qSize){
-	return (qSize==0);
+	return (qSize==0); //qSize를 통해 q가 비어있는지 확인, 비어있으면 리턴 true
 }
 
 
 
-/*
-	enQue: 
-   		1. q가 비어있는 경우, q의 front와 rear를 newnode로 일치시킨다.
-		2. q가 비어있지 않은 경우, q의 마지막에 newnode를 배치한다.
-		3. qSize를 하나 늘린다.
+/* 
+   enQue
+	# 사용: BFS(firstNode, S_ISDIR)
  */
-
 void enQue(QUE* q, struct NODE* newnode){
-	if (isEmpty(q->qSize)){
-		q->front = q->rear = newnode;
+	
+	if (isEmpty(q->qSize)){ //q가 비어있는 경우
+		q->front = q->rear = newnode; //q의 front와 rear를 newnode로 일치
 	}
-	else {
-		q->rear->next = newnode;
-		q->rear = q->rear->next;
+	else { //q가 비어있지 않은 경우
+		q->rear->next = newnode; //q의 끝에 newnode를 배치
+		q->rear = q->rear->next; //q의 끝 설정
 	}
-	q->qSize++;
+	
+	q->qSize++; //qSize Up
 }
 
 
 
-/*
-   deQue
-   		1. q가 비어있으면 error 문구를 출력한다.
-		2. q의 front를 delete한다.
-		3. qSize를 하나 줄인다.
+/* 
+   deQue 
+    # 사용: BFS(while끝)
  */
-
 void deQue(QUE* q){
-	if (isEmpty(q->qSize)){
+
+	if (isEmpty(q->qSize)){ //q가 비어있는 경우(deQ 불가능)
 		fprintf(stderr,"delete error: QisEmpty\n");
 		return;
 	}
-	struct NODE *tmp = q->front;
+
+	//q의 front를 deQ
+	struct NODE *tmp = q->front; 
 	q->front = q->front->next;
 	free(tmp);
-	q->qSize--;
+
+	q->qSize--; //qSize Down
 }
 
 
 
-/* createNode: Node를 동적할당하고, dp와 name을 init해 리턴한다. */
-
-struct NODE* createNode(DIR* dp, char* name){
+/* 
+   create_Node 
+     # 사용: BFS(firstNode, S_ISDIR)
+ */
+struct NODE* create_Node(DIR* dp, char* Nname){
+	
 	struct NODE* newnode = (NODE*)malloc(sizeof(NODE));
-	//init
+
+	//init newnode
 	newnode->dp = dp;
-	strcpy(newnode->name, name);
+	strcpy(newnode->Nname, Nname);
+	
 	return newnode;
 }
 
 
 
-/*
-void printQ(QUE* Q){
-	NODE* horse = Q->front;
-	int i=0;
-	printf("\n\n----------Q----------");
-	while (horse!=NULL){
-		printf("Q%d->name: %s\n", i++, horse->name);
-		horse = horse->next;
-	}
-	printf("--------------------\n\n");
-}
-*/
-
-
-
-
-/*
-	dirBFS:
-		1. bfs 탐색을 통해 toFind의 위치를 찾는다.
-		2. 찾았을 경우, 그 경로를 출력한다. (못 찾으면 출력하지 않음)
-
+/* 
+   BFS_for_Path
+	# 인자: toFind - 찾을 파일 또는 디렉터리의 이름 / workDir - 탐색 시작 경로
+	# 결과: 찾은 경우, 그 경로를 출력함 / 못 찾은 경우, 아무 것도 출력하지 않음
+	# 방식: 큐를 활용해 넓이 우선 탐색
+	# 사용: before_Search(끝) 
  */
-void dirBFS(char* toFind, char* workDir){
+void BFS_for_Path(char* toFind, char* workDir){
 
 	//prepare
 	struct dirent *dir = NULL;
 	QUE q = {NULL, NULL, 0};
-	struct NODE* firstNode = createNode(NULL, workDir);
+	struct NODE* firstNode = create_Node(NULL, workDir); //탐색 시작 경로를 firstNode로 만들어 enQ
 	enQue(&q, firstNode);
 	if ((q.front->dp = opendir(workDir))==NULL){
-		perror("File Open Error\n");
+		perror("Error Occurred!\n");
 		exit(1);
 	}
 
 
 	//bfs
-	while(!isEmpty(q.qSize)){
-		while((dir = readdir(q.front->dp))!=NULL){
+	while(!isEmpty(q.qSize)){ //q가 비어있지 않을 동안
+		while((dir = readdir(q.front->dp))!=NULL){ //q의 front->dp가 끝에 도달할 때까지 읽음
 			struct stat statbuf;
 			
 			//check
-			if (strcmp(dir->d_name, toFind)==0){
-				printf("[ Path: %s/%s ]\n", q.front->name, dir->d_name);
-				break;
+			if (strcmp(dir->d_name, toFind)==0){ //원하는 파일 또는 디렉터리를 찾았을 경우
+				printf("PATH: %s/%s\n", q.front->Nname, dir->d_name); //출력 후 break
+				break; //동일한 이름을 가진 파일 또는 디렉터리를 모두 찾기 위해서 return이 아닌 break
 			}
 
 			//pass
-			if (strncmp(dir->d_name,".",1)==0){
+			if (strncmp(dir->d_name,".",1)==0){ //.과 ..그리고 .으로 시작하는 파일(숨김파일 등)은 모두 건너뜀
 				continue;
 			}
 
 			//enque
-			char tmp[MAX];
-			strcpy(tmp, q.front->name);
+			char tmp[MAX]; //현재 위치를 tmp에 경로로 나타냄
+			strcpy(tmp, q.front->Nname);
 			strcat(tmp,"/");
 			strcat(tmp, dir->d_name);
-			if (lstat(tmp, &statbuf)<0){
+			if (lstat(tmp, &statbuf)<0){ //tmp(현재 위치)를 statbuf에 넣음
 				perror("Stat Error\n");
 				exit(1);
 			}
 			
-			if (S_ISDIR(statbuf.st_mode)){ //dir이면enque
-				struct NODE* n = createNode(opendir(tmp),tmp);
+			if (S_ISDIR(statbuf.st_mode)){ //dir이면 enQ(추후에 탐색)
+				struct NODE* n = create_Node(opendir(tmp),tmp);
 				enQue(&q,n);
 			}
 		
 		}
 		closedir(q.front->dp);
-		deQue(&q); //q의 front를 deQ
+		deQue(&q); //q의 front를 deQ (새로운 q의 front를 탐색하기 위해)
 	}
 }
 
 
 
 /*
-	dirDFS:
-		1. dfs 탐색을 통해 toFind의 위치를 찾는다.
-		2. 찾았을 경우, 그 경로를 출력한다. (못 찾으면 출력하지 않음)
+	DFS_for_Path
+	# 인자: toFind - 찾을 파일 또는 디렉터리의 이름 / workDir - 탐색 시작 경로
+	# 결과: 찾은 경우, 그 경로를 출력함 / 못 찾은 경우, 아무 것도 출력하지 않음
+	# 방식: 재귀를 활용해 깊이 우선 탐색
+	# 사용: before_Search(끝)
  */
-
-void dirDFS(char* toFind, char* workDir) {
+void DFS_for_Path(char* toFind, char* workDir) {
 
 	//prepare
 	DIR* dp = NULL;
@@ -735,31 +695,33 @@ void dirDFS(char* toFind, char* workDir) {
 
 
 	//dfs
-	while((dir=readdir(dp))!=NULL){
+	while((dir=readdir(dp))!=NULL){ //dp가 끝에 도달할 때까지 읽음
 
 		//check
-		if (strcmp(dir->d_name, toFind) == 0){
-			printf("[ Path: %s/%s ]\n", workDir, dir->d_name);
+		if (strcmp(dir->d_name, toFind) == 0){ //원하는 파일 또는 디렉터리를 찾았을 경우
+			printf("PATH: %s/%s\n", workDir, dir->d_name); //출력 후 return
 			closedir(dp);
-			return;
+			return; //재귀를 활용했기 때문에 break가 아닌 return
 		}
 	
 		//pass
-		if ((strncmp(dir->d_name,".",1)==0)){
+		if ((strncmp(dir->d_name,".",1)==0)){ //.과 ..그리고 .으로 시작하는 파일(숨김파일 등)은 모두 건너뜀
 			continue;
 		}
 		
 		//recurse
-		char tmp[MAX];
+		char tmp[MAX]; //현재 위치를 tmp에 경로로 나타냄
 		strcpy(tmp,workDir);
 		strcat(tmp,"/");
 		strcat(tmp,dir->d_name);
-		lstat(tmp, &statbuf);
-
-		if (S_ISDIR(statbuf.st_mode)){ //dir이면 recurse
-			dirDFS(toFind, tmp);
+		if (lstat(tmp, &statbuf)<0){ //tmp(현재 위치)를 statbuf에 넣음
+			perror("Stat Error\n");
+			exit(1);
 		}
 
+		if (S_ISDIR(statbuf.st_mode)){ //dir이면 recurse(탐색)
+			DFS_for_Path(toFind, tmp);
+		}
 	}
 
 	closedir(dp);
@@ -767,25 +729,24 @@ void dirDFS(char* toFind, char* workDir) {
 
 
 
-
-/*
-	getDirName:
-		1. 입력받은 dir 경로에서 dir 이름을 리턴한다.
-		2. dir 이름을 입력받은 경우 그대로 리턴한다.
+/* 
+   extract_Filename 
+	# 인자: Path - argv[2]로 입력받은 문자열 (찾을 파일/디렉토리의 경로 또는 이름)
+	# 목적: toFind에 argv[2]에서 추출한 파일/디렉토리의 이름을 넣음
+	# 사용: main 
  */
-
-char* getDirName(char* DirPath){
+char* extract_Filename(char* Path){
 
 	//No slashes
-	if (strstr(DirPath,"/")==NULL) {
-		return DirPath;
+	if (strstr(Path,"/")==NULL) { // argv[2]에서 파일 또는 디렉터리의 이름을 입력받은 경우
+		return Path; //그대로 리턴
 	}
 
 	//Slashes
-	char* temp = (char*)malloc(sizeof(char)*MAX);
-	char* ptr = strtok(DirPath,"/");
+	char* temp = (char*)malloc(sizeof(char)*MAX); //파일 또는 디렉터리의 경로에서 이름만을 추출하기 위해
+	char* ptr = strtok(Path,"/"); // "/" 기준으로 token화
 	while (ptr!=NULL) {
-		strcpy(temp, ptr);
+		strcpy(temp, ptr); //(결국엔) 마지막 ptr을 temp에 copy
 		ptr = strtok(NULL,"/");
 	}
 	return temp;
@@ -793,17 +754,21 @@ char* getDirName(char* DirPath){
 }
 
 
-/* parents: toFind가 ..(부모 디렉터리)인 경우 */
 
-char* parents(char* workDir){
+/* 
+   set_Parentdir_Path
+	# 목적: toFind가 ".."(부모 디렉터리)인 경우, 경로 설정을 위해
+	# 사용: before_Search("..") 
+ */
+char* set_Parentdir_Path(char* workDir){
 	int i=0;
 	char str[MAX], tmp[MAX][20];
-	char* ptr = strtok(workDir, "/");
+	char* ptr = strtok(workDir, "/"); //getcwd로 얻은 경로를 "/"기준으로 token화
 	for (i=0; ptr!=NULL; i++){
 		strcpy(tmp[i], ptr);
 		ptr = strtok(NULL,"/");
 	}
-	for (int k=0; k<i-1; k++){
+	for (int k=0; k<i-1; k++){ //마지막 token을 제외해 경로를 재생성
 		strcat(str,"/");
 		strcat(str, tmp[k]);
 	}
@@ -813,56 +778,53 @@ char* parents(char* workDir){
 
 
 
-/*
-	printDir:
-		1. "."또는 ".."을 입력받은 경우, 탐색하지 않고 바로 경로를 출력한다.
-		2. "."부터 시작하는 경로를 입력받은 경우, 현재 디렉토리부터 탐색 후 경로를 출력한다.
-		3. 그 외의 경우, 루트부터 탐색 후 경로를 출력한다.
+/* 
+   before_Search 
+	# 인자: argv - 찾을 파일/디렉토리의 경로 또는 이름 / toFind - 찾을 파일/디렉토리의 이름 / BD - BFS/DFS
+	# 사용: main
  */
-
-void printDir(char* argv, char* toFind, int BD){
+void before_Search(char* argv, char* toFind, int BD){
 	
 	//Prepare
 	char workDir[MAX];
 	struct passwd *pwd;
 	errno = 0;
-	if((pwd = getpwuid(getuid())) == NULL) { 
+	if((pwd = getpwuid(getuid())) == NULL) { //사용자 정보를 불러옴 - 사용자 계정명 등 (모든 컴퓨터에서 작동이 가능하도록)
 		if(errno == 0 || errno == ENOENT || errno == ESRCH || errno == EBADF || errno == EPERM) { 
 			fprintf(stderr,"미등록된 사용자입니다.\n"); 
 		} 
 		else { 
 			fprintf(stderr,"error: %s\n", strerror(errno)); 
 		}
-		return;	
+		exit(1);
 	}
 
-
-	//Branching
-	if (strcmp(argv,".") == 0){ //탐색x (.) //수정!
-		getcwd(workDir,MAX);
-		printf("[ Path: %s ]\n", workDir);
+	//Branch
+	if (strcmp(".", argv) == 0){ //탐색x (.)
+		getcwd(workDir,MAX); //현위치 (작업 디렉토리)를 불러와 출력
+		printf("[ Path: %s ]\n", workDir); 
 		return;
 	}
 	else if (strcmp("..", argv) == 0){ //탐색x (..)
-		getcwd(workDir,MAX);
-		printf("[ Path: %s ]\n", parents(workDir));
+		getcwd(workDir,MAX); //현위치를 기준으로 부모 디렉토리의 경로를 설정해 출력
+		printf("[ Path: %s ]\n", set_Parentdir_Path(workDir));
 		return;
 	}
-	else if (strncmp("./", argv, 2) == 0){ //탐색o (.)
-		getcwd(workDir, MAX);
+	else if (strncmp("./", argv, 2) == 0){ //탐색o (상대경로)
+		getcwd(workDir, MAX); //현재 디렉토리를 workDir에 넣음
 	}
-	else{ //탐색o (/,name)
-		strcpy(workDir,pwd->pw_dir);
+	else{ //탐색o (절대경로)
+		strcpy(workDir,pwd->pw_dir); //"/home/계정명"을 workDir에 넣음
 	}
 	
-	//Searching
+	//Search
 	if (BD==0){
 		printf("BFS Search\n");
-		dirBFS(toFind, workDir);
+		BFS_for_Path(toFind, workDir);
 	}
 	else{
 		printf("DFS Search\n");
-		dirDFS(toFind,workDir);
+		DFS_for_Path(toFind,workDir);
 	}
 
 }
