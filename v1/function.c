@@ -29,7 +29,7 @@ void selectmod(char *argv){
 		if (strncmp("/", argv, 1) == 0) // 절대 경로로 입력했을 경우
 			bfs(argv, "..");
 		else if (strncmp("..", argv, 2) == 0) // ../dirname의 경우
-			if (strcmp("..", argv, 2) == 0)
+			if (strcmp("..", argv) == 0)
 				dfs_print(0, "..");
 			else
 				bfs(argv, "..");
@@ -43,7 +43,7 @@ void selectmod(char *argv){
 		if (strncmp("/", argv, 1) == 0) // 절대 경로로 입력했을 경우
 			dfs(argv, "..");
 		else if (strncmp("..", argv, 2) == 0) // ../dirname의 경우
-			if (strcmp("..", argv, 2) == 0)
+			if (strcmp("..", argv) == 0)
 				dfs_print(0, "..");
 			else
 				dfs(argv, "..");
@@ -61,7 +61,7 @@ void selectmod(char *argv){
 */
 void bfs(char *name, char *wd){ 
 	struct dirent *entry; struct stat buf; DIR *dp;
-	Node queue[MAX]; int front, rear; front = rear = -1; // 큐 생성
+	NODE queue[MAX]; int front, rear; front = rear = -1; // 큐 생성
 	
 	if (chdir(wd) < 0){ // 디렉터리 이동, 실패 시 프로그램 종료
 		printf("오류 발생! 프로그램 종료.\n");
@@ -578,7 +578,7 @@ _Bool isEmpty(int qSize){
 
 /* 
    enQue
-	# 사용: BFS(firstNode, S_ISDIR)
+	# 사용: BFS(firstNODE, S_ISDIR)
  */
 void enQue(QUE* q, struct NODE* newnode){
 	
@@ -617,10 +617,10 @@ void deQue(QUE* q){
 
 
 /* 
-   create_Node 
-     # 사용: BFS(firstNode, S_ISDIR)
+   create_NODE 
+     # 사용: BFS(firstNODE, S_ISDIR)
  */
-struct NODE* create_Node(DIR* dp, char* Nname){
+struct NODE* create_NODE(DIR* dp, char* Nname){
 	
 	struct NODE* newnode = (NODE*)malloc(sizeof(NODE));
 
@@ -645,8 +645,8 @@ void BFS_for_Path(char* toFind, char* workDir){
 	//prepare
 	struct dirent *dir = NULL;
 	QUE q = {NULL, NULL, 0};
-	struct NODE* firstNode = create_Node(NULL, workDir); //탐색 시작 경로를 firstNode로 만들어 enQ
-	enQue(&q, firstNode);
+	struct NODE* firstNODE = create_NODE(NULL, workDir); //탐색 시작 경로를 firstNODE로 만들어 enQ
+	enQue(&q, firstNODE);
 	if ((q.front->dp = opendir(workDir))==NULL){
 		perror("Error Occurred!\n");
 		exit(1);
@@ -680,7 +680,7 @@ void BFS_for_Path(char* toFind, char* workDir){
 			}
 			
 			if (S_ISDIR(statbuf.st_mode)){ //dir이면 enQ(추후에 탐색)
-				struct NODE* n = create_Node(opendir(tmp),tmp);
+				struct NODE* n = create_NODE(opendir(tmp),tmp);
 				enQue(&q,n);
 			}
 		
