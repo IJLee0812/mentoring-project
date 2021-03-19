@@ -8,7 +8,6 @@
 #include <pwd.h>
 #include <errno.h>
 
-#define PathMax 255
 #define MAX 1000
 
 typedef struct{
