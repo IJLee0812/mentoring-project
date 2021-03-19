@@ -17,7 +17,8 @@ int main(int argc, char *argv[]){
 	if((BD==0)||(BD==1)){
 		//준호
 		absDir = absolute(argv[1]);
-		dfs_or_bfs(absDir,BD);		
+		dfs_or_bfs(absDir,BD);
+		printf("juno3\n");
 
 		//지우
 		char tmp_Path[MAX];
@@ -30,7 +31,9 @@ int main(int argc, char *argv[]){
 		printf("Select Error(BFS:0, DFS:1)\n");
 	
 	//익준
+	printf("ikjun");//
 	init(argv[1]); 
 	selectmod(argv[1]);
 
+	return 0;
 }
