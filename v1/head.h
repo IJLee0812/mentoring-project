@@ -9,6 +9,8 @@
 #include <errno.h>
 
 #define MAX 1000
+#define STR_MAX 255
+#define Q_MAX 1000
 
 typedef struct NODE{
 	DIR *dp;
