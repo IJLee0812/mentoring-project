@@ -55,11 +55,11 @@ char *strrev(char *);
 //준호
 char* absolute(char*);
 void dfs_or_bfs(char*,int);
-int fileSize_dfs(char*);
+int dfs_for_dirsize(char*);
 void push(Stack* , NODE*);
 NODE* initNODE(DIR*, char*, NODE*);
 void pop(Stack*);
-int fileSize_bfs(char*);
+int bfs_for_dirsize(char*);
 void enqueue(Queue* , char*);
 void dequeue(Queue*);
 _Bool isFull(Queue*);
