@@ -29,12 +29,15 @@ void selectmod(char *argv){
 		if (strncmp("/", argv, 1) == 0) // 절대 경로로 입력했을 경우
 			bfs(argv, "..");
 		else if (strncmp("..", argv, 2) == 0) // ../dirname의 경우
-			if (strcmp("..", argv) == 0)
+			if ((strcmp("..", argv) == 0) || (strcmp("../", argv) == 0))
 				dfs_print(0, "..");
 			else
 				bfs(argv, "..");
-		else if (strcmp(".", argv) == 0) // . 입력했을 경우(프로그램 위치한 디렉터리) 탐색X, 출력
-			dfs_print(0, ".");
+		else if (strncmp(".", argv, 1) == 0) // . 입력했을 경우(프로그램 위치한 디렉터리) 탐색X, 출력
+			if ((strcmp(".", argv) == 0) || (strcmp("./", argv) == 0))
+				dfs_print(0, ".");
+			else
+				bfs(argv, ".");
 		else // dirname 또는 상대경로로 입력했을 경우
 			bfs(argv, ".");
 	}
@@ -43,12 +46,15 @@ void selectmod(char *argv){
 		if (strncmp("/", argv, 1) == 0) // 절대 경로로 입력했을 경우
 			dfs(argv, "..");
 		else if (strncmp("..", argv, 2) == 0) // ../dirname의 경우
-			if (strcmp("..", argv) == 0)
+			if ((strcmp("..", argv) == 0) || (strcmp("../", argv) == 0))
 				dfs_print(0, "..");
 			else
 				dfs(argv, "..");
-		else if (strcmp(".", argv) == 0) // . 입력했을 경우(프로그램 위치한 디렉터리) 탐색X, 출력
-			dfs_print(0, ".");
+		else if (strncmp(".", argv, 1) == 0) // . 입력했을 경우(프로그램 위치한 디렉터리) 탐색X, 출력
+			if ((strcmp(".", argv) == 0) || (strcmp("./", argv) == 0))
+				dfs_print(0, ".");
+			else
+				dfs(argv, ".");
 		else // dirname 또는 상대경로로 입력했을 경우
 			dfs(argv, ".");
 	}
