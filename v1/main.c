@@ -4,7 +4,8 @@ int main(int argc, char *argv[]){
 	
 	int BD;
 	char* toFind;
-
+	char* absDir;
+	
 	if(argc != 3){
 		fprintf(stderr, "Usage : Program [-Dir] [-File]\n");
 		exit(1);
@@ -15,10 +16,8 @@ int main(int argc, char *argv[]){
 
 	if((BD==0)||(BD==1)){
 		//준호
-		if(BD==0)
-			fileSize_bfs(argc,argv);
-		else
-			fileSize_dfs(argc,argv);		//스읍 나도 그냥 함수 인자로 받을까
+		absDir = absolute(argv[1]);
+		dfs_or_bfs(absDir,BD);		
 
 		//지우
 		toFind = getDirName(argv[2]);
