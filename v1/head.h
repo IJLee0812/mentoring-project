@@ -24,7 +24,7 @@ typedef struct NODE{
 }NODE;
 
 typedef struct{
-	Node* top;
+	NODE* top;
 	int size;
 }Stack;
 
