@@ -10,11 +10,11 @@
 
 #define MAX 1000
 
-typedef struct{
+typedef struct NODE{
 	DIR *dp;
 	char Nname[MAX];
-	struct Node* next;
-}Node;
+	struct NODE* next;
+}NODE;
 
 typedef struct{
 	char (*pathptr)[STR_MAX];
@@ -41,11 +41,13 @@ void dfs(char *, char *);
 void dfs_print(int, char *); 
 char *strrev(char *);
 
-void fileSize_dfs(int argc, char* argv[]);
-void push(Stack* , Node*);
-Node* initNode(DIR*, char*, Node*);
+char* absolute(char*);
+void dfs_or_bfs(char*,int);
+int fileSize_dfs(char*);
+void push(Stack* , NODE*);
+NODE* initNODE(DIR*, char*, NODE*);
 void pop(Stack*);
-void fileSize_bfs(int argc, char* argv[]);
+int fileSize_bfs(char*);
 void enqueue(Queue* , char*);
 void dequeue(Queue*);
 _Bool isEmpty(Queue*);
