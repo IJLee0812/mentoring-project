@@ -240,34 +240,19 @@ char *strrev(char *str){ // 문자열 뒤집는 함수(string.h_strrev는 리눅
 
 /*준호*/
 
-/*
-	#함수 설명 : 크기를 구하고 싶은 디렉토리를 argv를 통해 받아 출력한다.
-	#변수 : int argc, char* argv[] - main의 argc,argv
-	#리턴값 : void
-*/
-void fileSize_dfs(int argc, char* argv[]){
-	struct stat stbuf;
-	int totalSize = 0;
+char* absolute(char* path){
+	char *absPath = (char*)malloc(sizeof(char)*MAX);
+	char strbuf[MAX]={};
 	int intbuf;
 
-	Stack st={NULL,0};
-	struct dirent *direntp;
-	char absPath[MAX]={};
-	char strbuf[MAX]={};
-
-	if(argc<=1){
-		printf("Usage : %s [dirname] [filename]\n",argv[0]);
-		exit(1);
-   	}
-
 	/*argv[1] 문자열 처리*/
-	if(argv[1][0]=='/')							//argv[1]==절대경로
-		strcpy(absPath,argv[1]);
+	if(path[0]=='/')							//argv[1]==절대경로
+		strcpy(absPath,path);
 	else{										//argv[1]==상대경로
 		getcwd(absPath,MAX);
-		if(strcmp(argv[1],".")){
-			for(int i=0; argv[1][i]!='\0'; ){
-				if(!strncmp(argv[1]+i,"../",3)){
+		if(strcmp(path,".")){
+			for(int i=0; path[i]!='\0'; ){
+				if(!strncmp(path+i,"../",3)){
 					//tmp에서 가장 뒤에 있는 '/'찾기
 					//리턴값 : 위치(max로 준다는 생각)
 					//받은 리턴값에 '\0'대입
@@ -277,11 +262,11 @@ void fileSize_dfs(int argc, char* argv[]){
 					absPath[intbuf] = '\0';
 					i+=3;
 				}
-				else if(!strncmp(argv[1]+i,"./",2)){
+				else if(!strncmp(path+i,"./",2)){
 					i+=2;
 				}
 				else{
-					strncat(strbuf,argv[1]+i,1);
+					strncat(strbuf,path+i,1);
 					i++;
 				}
 			}
@@ -290,8 +275,37 @@ void fileSize_dfs(int argc, char* argv[]){
 		}
 	}
 
+	return absPath;
+}
+
+void dfs_or_bfs (char* absPath,int BD){
+
+	int totalSize = 0;
+	
+	if(BD==0)
+		totalSize = fileSize_dfs(absPath);
+	else if(BD==1)
+		totalSize = fileSize_bfs(absPath);
+	else
+		perror("Error : unexpected value of valiable \"BD\"!!\n");
+
+	printf("<<total : %d>>\n",totalSize);
+}
+
+/*
+	#함수 설명 : 크기를 구하고 싶은 디렉토리를 argv를 통해 받아 출력한다.
+	#변수 : int argc, char* argv[] - main의 argc,argv
+	#리턴값 : void
+*/
+int fileSize_dfs(char* absPath){
+	struct stat stbuf;
+	int totalSize = 0;
+
+	Stack st={NULL,0};
+	struct dirent *dir;
+
 	/*stack에 argv[1] dirp 추가 */
-	push(&st,initNode(NULL,"",NULL));
+	push(&st,initNODE(NULL,"",NULL));
 
 	if((st.top->dp=opendir(absPath))==NULL){
 		printf("Error : fail on open directory!\n");
@@ -302,14 +316,14 @@ void fileSize_dfs(int argc, char* argv[]){
 
 	/*전체 탐색 알고리즘*/
 	while(st.size){										//모든 디렉토리가 스택에서 pop되면 종료
-		if((direntp=readdir(st.top->dp))!=NULL){
-			if(strcmp(direntp->d_name,".")!=0&&strcmp(direntp->d_name,"..")!=0){
+		if((dir=readdir(st.top->dp))!=NULL){
+			if(strcmp(dir->d_name,".")!=0&&strcmp(dir->d_name,"..")!=0){
 
 			/*탐색 디렉토리 문자열 처리*/
-            strcpy(absPath, st.top->name);
+            strcpy(absPath, st.top->Nname);
 			if(absPath[strlen(absPath)-1]!='/')
 	            strcat(absPath,"/");
-            strcat(absPath,direntp->d_name);
+            strcat(absPath,dir->d_name);
 
             stat(absPath,&stbuf);	//탐색 디렉토리 정보 불러오기
 
@@ -318,7 +332,7 @@ void fileSize_dfs(int argc, char* argv[]){
    				printf("%-8ld  %s\n",stbuf.st_size,absPath);
              }
             else									//디렉토리일 경우 top에 추가후 위의 과정 반복
-               push(&st,initNode(opendir(absPath),absPath,NULL));
+               push(&st,initNODE(opendir(absPath),absPath,NULL));
 			}
 
 		}
@@ -326,16 +340,16 @@ void fileSize_dfs(int argc, char* argv[]){
          pop(&st);
 	}
 
-   printf("<<total : %d>>\n",totalSize);
+	return totalSize;
 }
 
 /*
 	#함수 설명 : 스택의 top에 노드를 push한다.
-	#변수 : Stack *s - 노드를 추가할 스텍의 포인터, Node* n - 추가할 노드의 포인터
+	#변수 : Stack *s - 노드를 추가할 스텍의 포인터, NODE* n - 추가할 노드의 포인터
 	#리턴값 : void
 */
-void push(Stack *s, Node* n){
-	Node* tmp;
+void push(Stack *s, NODE* n){
+	NODE* tmp;
 
 	tmp = s->top;
 	s->top = n;
@@ -345,11 +359,11 @@ void push(Stack *s, Node* n){
 
 /*
 	#함수 설명 : 노드를 생성한다.
-	#변수 : DIR* newDirp, char* newName, Node* newNext -새로운 노드의 정보들
-	#리턴값 : 새로 동적할당해 값을 대입한 Node*
+	#변수 : DIR* newDirp, char* newName, NODE* newNext -새로운 노드의 정보들
+	#리턴값 : 새로 동적할당해 값을 대입한 NODE*
 */
-Node* initNode(DIR* newDp, char* newName, Node* newNext){
-	Node* new = (Node*)malloc(sizeof(Node));
+NODE* initNODE(DIR* newDp, char* newName, NODE* newNext){
+	NODE* new = (NODE*)malloc(sizeof(NODE));
 
 	new->dp = newDp;
 	strcpy(new->Nname, newName);
@@ -364,7 +378,7 @@ Node* initNode(DIR* newDp, char* newName, Node* newNext){
 	#리턴값 : void
 */
 void pop(Stack *s){
-   Node* tmp;
+   NODE* tmp;
 
    tmp = s->top;
    s->top = s->top->next;
@@ -378,53 +392,14 @@ void pop(Stack *s){
 	#변수 : int argc, char* argv[] - main의 argc,argv
 	#리턴값 : void
 */
-void fileSize_bfs(int argc, char* argv[]){
+int fileSize_bfs(char* absPath){
 	struct stat stbuf;
 	int totalSize = 0;
-	int intbuf;
 	DIR *dirp;
 
 	Queue Q={(char(*)[STR_MAX])malloc(sizeof(char)*STR_MAX*Q_MAX),0,-1,Q_MAX};
 
-
-	struct dirent *dp;
-	char absPath[STR_MAX]={};
-	char strbuf[STR_MAX]={};
-
-	if(argc<=1){
-		printf("Usage : %s [dirname] [filename]\n",argv[0]);
-		exit(1);
-   	}
-
-	/*absPath = argv[1] 절대경로*/
-	if(argv[1][0]=='/')							//argv[1]==절대경로
-		strcpy(absPath,argv[1]);
-	else{										//argv[1]==상대경로
-		getcwd(absPath,STR_MAX);
-		if(strcmp(argv[1],".")){
-			for(int i=0; argv[1][i]!='\0'; ){
-				if(!strncmp(argv[1]+i,"../",3)){
-					/*마지막 /를 \0으로 변경 -> 부모 dir 절대경로*/
-					for(int j=0; absPath[j]!='\0';j++)
-						if(absPath[j]=='/')
-							intbuf = j;
-					absPath[intbuf] = '\0';
-					i+=3;
-				}
-				else if(!strncmp(argv[1]+i,"./",2)){
-					/* ./는 읽을필요 없음 */
-					i+=2;
-				}
-				else{
-					/*남은 문자열경로 strbuf에 하나씩 저장*/
-					strncat(strbuf,argv[1]+i,1);
-					i++;
-				}
-			}
-			strcat(absPath,"/");
-			strcat(absPath,strbuf);
-		}
-	}
+	struct dirent *dir;
 
 	/*stack에 argv[1] dirp 추가 */
 	enqueue(&Q,absPath);
@@ -444,14 +419,14 @@ void fileSize_bfs(int argc, char* argv[]){
 		(하위 디렉토리를 다 읽었을 때)
 	 */
 	while(!isEmpty(&Q)){
-		if((dp=readdir(dirp))!=NULL){		//다음 dp로 이동
-			if(strcmp(dp->d_name,".")!=0&&strcmp(dp->d_name,"..")!=0){
+		if((dir=readdir(dirp))!=NULL){		//다음 dp로 이동
+			if(strcmp(dir->d_name,".")!=0&&strcmp(dir->d_name,"..")!=0){
 
 			/*absPath = dp의 절대경로*/
             strcpy(absPath, Q.pathptr[Q.front]);
 			if(absPath[strlen(absPath)-1]!='/')
 	            strcat(absPath,"/");
-            strcat(absPath,dp->d_name);
+            strcat(absPath,dir->d_name);
 			/*dp의 stat 불러오기*/
             stat(absPath,&stbuf);
 
@@ -472,7 +447,7 @@ void fileSize_bfs(int argc, char* argv[]){
 		}
 	}
 
-   printf("<<total : %d>>\n",totalSize);
+	return totalSize;
 }
 
 /*
