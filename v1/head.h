@@ -52,7 +52,6 @@ void pop(Stack*);
 int fileSize_bfs(char*);
 void enqueue(Queue* , char*);
 void dequeue(Queue*);
-_Bool isEmpty(Queue*);
 _Bool isFull(Queue*);
 void expandCapacity(Queue*);
 
