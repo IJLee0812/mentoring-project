@@ -276,22 +276,25 @@ char *strrev(char *str){ // (문자열 뒤집는 함수(string.h_strrev는 리�
 
 /*준호*/
 
+/*
+	#함수 설명 : 경로를 받아서 절대경로로 바꿔준다.
+	#변수 : char* path - 절대/상대 경로
+	#리턴값 : path의 절대경로
+   */
 char* absolute(char* path){
 	char *absPath = (char*)malloc(sizeof(char)*MAX);
 	char strbuf[MAX]={};
 	int intbuf;
 
-	/*argv[1] 문자열 처리*/
-	if(path[0]=='/')							//argv[1]==절대경로
+	/*path 문자열 처리*/
+	if(path[0]=='/')								//path==절대경로
 		strcpy(absPath,path);
-	else{										//argv[1]==상대경로
+	else{											//path==상대경로
 		getcwd(absPath,MAX);
 		if(strcmp(path,".")){
 			for(int i=0; path[i]!='\0'; ){
 				if(!strncmp(path+i,"../",3)){
-					//tmp에서 가장 뒤에 있는 '/'찾기
-					//리턴값 : 위치(max로 준다는 생각)
-					//받은 리턴값에 '\0'대입
+					/*가장 뒤에 있는 '/'찾아서'\0'대입*/
 					for(int j=0; absPath[j]!='\0';j++)
 						if(absPath[j]=='/')
 							intbuf = j;
@@ -314,14 +317,21 @@ char* absolute(char* path){
 	return absPath;
 }
 
+
+/*
+	#함수 설명 : 처음 BFS/DFS 선택지에 따라 fileSize함수를 실행하고 결과를 출력한다.
+	#변수 : char* absPath - 크기를 구할 디렉토리의 절대 경로
+			int BD - BFS/DFS 선택지 (BFS:0, DFS:1)
+	#리턴값 : void
+   */
 void dfs_or_bfs (char* absPath,int BD){
 
 	int totalSize = 0;
 	
 	if(BD==0)
-		totalSize = fileSize_dfs(absPath);
+		totalSize = dfs_for_dirsize(absPath);
 	else if(BD==1)
-		totalSize = fileSize_bfs(absPath);
+		totalSize = bfs_for_dirsize(absPath);
 	else
 		perror("Error : unexpected value of valiable \"BD\"!!\n");
 
@@ -329,18 +339,18 @@ void dfs_or_bfs (char* absPath,int BD){
 }
 
 /*
-	#함수 설명 : 크기를 구하고 싶은 디렉토리를 argv를 통해 받아 출력한다.
-	#변수 : int argc, char* argv[] - main의 argc,argv
-	#리턴값 : void
+	#함수 설명 : 해당 디렉토리 내의 모든 파일크기를 DFS로 탐색하여 총합을 리턴
+	#변수 : char* absPath - 크기를 구할 디렉토리의 절대 경로
+	#리턴값 : 해당 디렉토리 내의 모든 파일크기 합
 */
-int fileSize_dfs(char* absPath){
+int dfs_for_dirsize(char* absPath){
 	struct stat stbuf;
 	int totalSize = 0;
 
 	Stack st={NULL,0};
 	struct dirent *dir;
 
-	/*stack에 argv[1] dirp 추가 */
+	/*stack에 시작 디렉토리 노드 추가*/
 	push(&st,initNODE(NULL,"",NULL));
 
 	if((st.top->dp=opendir(absPath))==NULL){
@@ -350,7 +360,14 @@ int fileSize_dfs(char* absPath){
    	strcpy(st.top->Nname,absPath);
 
 
-	/*전체 탐색 알고리즘*/
+	/*전체 탐색 알고리즘:DFS*/
+	/*
+		#구현 : top에 있는 디렉토리를 readdir로 하위 디렉토리(dir) 읽고 stat을 통해 디렉토리, 파일 판단
+		#dp가 dir일 때 : 해당 dir을 stack의 top에 올려서 읽기 시작
+		#dp가 file일 때 : totalsize에 해당 file사이즈 더하고 정보 출력, 다음 dir로 이동
+		#dp가 NULL일 때 : 현재 top에 있는 디렉토리를 pop하고 이전 top에 있던 디렉토리를 이어서 읽기 시작
+		(하위 디렉토리를 다 읽었을 때)
+	 */
 	while(st.size){										//모든 디렉토리가 스택에서 pop되면 종료
 		if((dir=readdir(st.top->dp))!=NULL){
 			if(strcmp(dir->d_name,".")!=0&&strcmp(dir->d_name,"..")!=0){
@@ -363,17 +380,17 @@ int fileSize_dfs(char* absPath){
 
             stat(absPath,&stbuf);	//탐색 디렉토리 정보 불러오기
 
-            if((stbuf.st_mode&0xF000)==0x8000){		//파일일 경우 : S_ISDIR(buf.st_mode)
+            if((stbuf.st_mode&0xF000)==0x8000){		//dir이 파일일 경우
 				totalSize += stbuf.st_size;
-   				printf("%-8ld  %s\n",stbuf.st_size,absPath);
              }
-            else									//디렉토리일 경우 top에 추가후 위의 과정 반복
+            else									//dir이 디렉토리일 경우
                push(&st,initNODE(opendir(absPath),absPath,NULL));
 			}
 
 		}
-      else		//readdir(st.top->dir)==NULL : 현재 디렉토리 안의 모든 dir 확인 시
-         pop(&st);
+		else											//dir이 NULL일 경우
+			/*top을 이전에 읽던 디렉토리로 변경*/
+        	pop(&st);
 	}
 
 	return totalSize;
@@ -396,7 +413,7 @@ void push(Stack *s, NODE* n){
 /*
 	#함수 설명 : 노드를 생성한다.
 	#변수 : DIR* newDirp, char* newName, NODE* newNext -새로운 노드의 정보들
-	#리턴값 : 새로 동적할당해 값을 대입한 NODE*
+	#리턴값 : 해당 정보를 삽입한 새로운 노드의 포인터
 */
 NODE* initNODE(DIR* newDp, char* newName, NODE* newNext){
 	NODE* new = (NODE*)malloc(sizeof(NODE));
@@ -424,11 +441,12 @@ void pop(Stack *s){
 }
 
 /*
-	#함수 설명 : 크기를 구하고 싶은 디렉토리를 argv를 통해 받아 출력한다.
-	#변수 : int argc, char* argv[] - main의 argc,argv
-	#리턴값 : void
+	#함수 설명 : 해당 디렉토리 내의 모든 파일크기를 BFS로 탐색하여 총합을 리턴
+	#변수 : char* absPath - 크기를 구할 디렉토리의 절대 경로
+	#리턴값 : 해당 디렉토리 내의 모든 파일크기 합
+	
 */
-int fileSize_bfs(char* absPath){
+int bfs_for_dirsize(char* absPath){
 	struct stat stbuf;
 	int totalSize = 0;
 	DIR *dirp;
@@ -437,7 +455,7 @@ int fileSize_bfs(char* absPath){
 
 	struct dirent *dir;
 
-	/*stack에 argv[1] dirp 추가 */
+	/*queue에 시작 디렉토리 경로 추가*/
 	enqueue(&Q,absPath);
 
 	if((dirp=opendir(absPath))==NULL){
@@ -448,29 +466,28 @@ int fileSize_bfs(char* absPath){
 
 	/*전체 탐색 알고리즘:BFS*/
 	/*
-		#구현 : front에 있는 디렉토리를 readdir로 하위 디렉토리(dp) 읽고 stat을 통해 dir, file 판단
-		#dp가 dir일 때 : 해당 dir을 queue의 rear에 올려놓음
-		#dp가 file일 때 : totalsize에 해당 file사이즈 더하고 정보 출력, 다음 dp로 이동
-		#dp가 NULL일 때 : 현재 front에 있는 디렉토리를 dequeque하고 다음 front 디렉토리를 읽기시작
+		#구현 : front에 있는 디렉토리를 readdir로 하위 디렉토리(dir) 읽고 stat을 통해 디렉토리, 파일 판단
+		#dp가 dir일 때 : 해당 dir을 queue의 rear에 올려놓고 다음 dir로 이동
+		#dp가 file일 때 : totalsize에 해당 file사이즈 더하고 정보 출력, 다음 dir로 이동
+		#dp가 NULL일 때 : 현재 front에 있는 디렉토리를 dequeque하고 다음 front 디렉토리를 읽기 시작
 		(하위 디렉토리를 다 읽었을 때)
 	 */
 	while(!isEmpty(Q.rear-Q.front+1)){
-		if((dir=readdir(dirp))!=NULL){		//다음 dp로 이동
+		if((dir=readdir(dirp))!=NULL){		//다음 dir로 이동
 			if(strcmp(dir->d_name,".")!=0&&strcmp(dir->d_name,"..")!=0){
 
-			/*absPath = dp의 절대경로*/
+			/*absPath = dir의 절대경로*/
             strcpy(absPath, Q.pathptr[Q.front]);
 			if(absPath[strlen(absPath)-1]!='/')
 	            strcat(absPath,"/");
             strcat(absPath,dir->d_name);
-			/*dp의 stat 불러오기*/
+			/*dir의 stat 불러오기*/
             stat(absPath,&stbuf);
 
-            if((stbuf.st_mode&0xF000)==0x8000){		//dp가 file일 경우
+            if((stbuf.st_mode&0xF000)==0x8000){		//dir이 파일일 경우
 				totalSize += stbuf.st_size;
-   				printf("%-8ld  %s\n",stbuf.st_size,absPath);
              }
-            else									//dp가 dir일 경우
+            else									//dir이 디렉토리일 경우
                	enqueue(&Q,absPath);
 			}
 
@@ -479,7 +496,6 @@ int fileSize_bfs(char* absPath){
 			/*front갱신 후 디렉토리 변경*/
     		dequeue(&Q);
 			dirp=opendir(Q.pathptr[Q.front]);
-
 		}
 	}
 
@@ -487,8 +503,9 @@ int fileSize_bfs(char* absPath){
 }
 
 /*
-	#함수 설명 : 큐의 rear에 노드를 enqueue한다, 큐가 가득찼으면 용량을 키우고 진행한다.
-	#변수 : Queue *q - 경로를 집어넣을 큐, char* newpath - 큐에 들어갈 문자열의 포인터
+	#함수 설명 : 큐의 rear에 노드를 enqueue한다, 큐가 가득찼으면 용량을 키운다.
+	#변수 : Queue *q - 경로를 집어넣을 큐, 
+			char* newpath - 큐에 들어갈 문자열의 포인터
 	#리턴값 : void
 */
 void enqueue(Queue *q, char* newpath){
@@ -503,7 +520,7 @@ void enqueue(Queue *q, char* newpath){
 
 /*
 	#함수 설명 : 큐의 front 노드를 dequeue한다.
-	#변수 : Queue *q - front을 내보낼 큐의 포인터
+	#변수 : Queue *q - front를 내보낼 큐의 포인터
 	#리턴값 : void
 */
 void dequeue(Queue *q){
@@ -529,7 +546,7 @@ _Bool isFull(Queue * q){
 }
 
 /*
-	#함수 설명 : 큐의 용량을 증가시킨다. 함수 실행후 front=0이 되도록 설정
+	#함수 설명 : 큐의 용량을 증가시킨다. (default : 함수 실행 후 front=0)
 	#변수 : Queue *q - 용량을 증가시킬 큐
 	#리턴값 : void
 */
