@@ -12,7 +12,6 @@ char wd[MAX];
 void init(char *name){ // 탐색할 디렉터리 이름(또는 경로), 탐색 시작 절대경로(프로그램 위치)출력
 	printf("탐색할 디렉터리 이름(경로) : %s\n", name);
 	getcwd(wd, BUFSIZ); // 프로그램 위치를 불러오기 위해 사용, wd에 저장
-	//printf("프로그램 위치(절대경로) : %s\n", wd); 
 	return;
 }
 
@@ -90,8 +89,6 @@ void Bfs_for_SearchTree(char *name, char *wd){
 				if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) // ".", ".."은 고려하지 않음
 					continue;
 				
-				//printf("탐색된 디렉터리 : %s\n", entry->d_name); 
-				
 				if (strncmp(strrev(name), strrev(entry->d_name), strlen(entry->d_name)) == 0){ // <입력한 이름(경로) == 탐색한 디렉터리명>인 경우					
 					strrev(name); strrev(entry->d_name);   
 					printf("\n%s----\n", entry->d_name); // 입력한(경로의) 디렉터리명 출력
@@ -110,7 +107,6 @@ void Bfs_for_SearchTree(char *name, char *wd){
 				if (havedir(path)){ // 탐색 중인 디렉터리가 하위 디렉터리를 보유한 경우
 					rear++; // 저장할 공간 확보
 					strcpy(queue[rear].Nname, path);// 대상 디렉터리 경로 저장
-					//printf("Queue에 %s 디렉터리 정보(경로) 저장\n", entry->d_name);
 				}
 				
 				chdir("..");
@@ -118,8 +114,7 @@ void Bfs_for_SearchTree(char *name, char *wd){
 		}
 		// 같은 깊이의 모든 노드들의 탐색이 끝난 경우
 		front++;
-		//printf("%s 디렉터리로 이동\n", queue[front].Nname); // 선입선출, 비었으면 함수 종료
-		closedir(dp); chdir(queue[front].Nname);
+		closedir(dp); chdir(queue[front].Nname); // 선입선출, 비었으면 함수 종료
 		
 		if ((dp = opendir(queue[front].Nname)) == NULL){ // Dequeue한 디렉터리로 이동
 			printf("Dequeue 오류 발생. 프로그램 종료\n");
@@ -149,14 +144,12 @@ int havedir(char *path){ // 하위 디렉터리 보유 여부 체크 함수
 			
 			if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
 				continue;
-			//printf("탐색된 디렉터리는 하위 디렉터리 존재\n");
 			closedir(dp);
 			return 1; // 1 반환, if문 True
 		
 		}
 	}
 	
-	//printf("탐색된 디렉터리는 하위 디렉터리 존재 X\n");
 	closedir(dp);
 	return 0; // 0 반환, if문 False
 }
@@ -275,8 +268,6 @@ char *strrev(char *str){ // (문자열 뒤집는 함수(string.h_strrev는 리�
 	}
 	return str;
 }
-
-
 
 /*준호: size*/
 
