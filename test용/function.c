@@ -25,16 +25,18 @@ void selectmod(char *argv, int mod){
 	if (mod == 0){
 		if (strncmp("/", argv, 1) == 0) // 절대 경로로 입력했을 경우
 			Bfs_for_SearchTree(argv, "..");
-		else if (strncmp("..", argv, 2) == 0) // ../dirname의 경우
-			if ((strcmp("..", argv) == 0) || (strcmp("../", argv) == 0))
+		else if (strncmp("..", argv, 2) == 0) // ..로 시작할 경우
+			if ((strcmp("..", argv) == 0) || (strcmp("../", argv) == 0)) // 부모 디렉터리
 				Dfs_for_PrintTree(0, "..");
+			else if (strncmp("../.", argv, 4) == 0) // 상위 디렉터리
+				Dfs_for_PrintTree(0, argv);
 			else
-				Bfs_for_SearchTree(argv, "..");
-		else if (strncmp(".", argv, 1) == 0) // . 입력했을 경우(프로그램 위치한 디렉터리) 탐색X, 출력
-			if ((strcmp(".", argv) == 0) || (strcmp("./", argv) == 0))
+				Bfs_for_SearchTree(argv, ".."); // 프로그램 위치 디렉터리와 같은 깊이의 디렉터리
+		else if (strncmp(".", argv, 1) == 0) // .로 시작할 경우
+			if ((strcmp(".", argv) == 0) || (strcmp("./", argv) == 0)) // 현재 디렉터리
 				Dfs_for_PrintTree(0, ".");
 			else
-				Bfs_for_SearchTree(argv, ".");
+				Bfs_for_SearchTree(argv, "."); // 하위 디렉터리
 		else // dirname 또는 상대경로로 입력했을 경우
 			Bfs_for_SearchTree(argv, ".");
 	}
@@ -42,16 +44,18 @@ void selectmod(char *argv, int mod){
 	else if (mod == 1){
 		if (strncmp("/", argv, 1) == 0) // 절대 경로로 입력했을 경우
 			Dfs_for_SearchTree(argv, "..");
-		else if (strncmp("..", argv, 2) == 0) // ../dirname의 경우
-			if ((strcmp("..", argv) == 0) || (strcmp("../", argv) == 0))
+		else if (strncmp("..", argv, 2) == 0) // ..로 시작할 경우
+			if ((strcmp("..", argv) == 0) || (strcmp("../", argv) == 0)) // 부모 디렉터리
 				Dfs_for_PrintTree(0, "..");
+			else if (strncmp("../.", argv, 4) == 0) // 상위 디렉터리
+				Dfs_for_PrintTree(0, argv);
 			else
-				Dfs_for_SearchTree(argv, "..");
-		else if (strncmp(".", argv, 1) == 0) // . 입력했을 경우(프로그램 위치한 디렉터리) 탐색X, 출력
-			if ((strcmp(".", argv) == 0) || (strcmp("./", argv) == 0))
+				Dfs_for_SearchTree(argv, ".."); // 프로그램 위치 디렉터리와 같은 깊이의 디렉터리
+		else if (strncmp(".", argv, 1) == 0) // .로 시작할 경우
+			if ((strcmp(".", argv) == 0) || (strcmp("./", argv) == 0)) // 현재 디렉터리
 				Dfs_for_PrintTree(0, ".");
 			else
-				Dfs_for_SearchTree(argv, ".");
+				Dfs_for_SearchTree(argv, "."); // 하위 디렉터리
 		else // dirname 또는 상대경로로 입력했을 경우
 			Dfs_for_SearchTree(argv, ".");
 	}
