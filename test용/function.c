@@ -117,7 +117,12 @@ void Bfs_for_SearchTree(char *name, char *wd){
 			}
 		}
 		// 같은 깊이의 모든 노드들의 탐색이 끝난 경우
-		front++;
+		if (front == rear){ // 큐가 비어있을 경우 함수 종료
+			printf("Empty Queue.\n");
+			return;
+		}
+		else	
+			front++;
 		closedir(dp); chdir(queue[front].Nname); // 선입선출, 비었으면 함수 종료
 		
 		if ((dp = opendir(queue[front].Nname)) == NULL){ // Dequeue한 디렉터리로 이동
