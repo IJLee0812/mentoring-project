@@ -495,9 +495,12 @@ int Bfs_for_Size(char* absPath){
 		(하위 디렉토리를 다 읽었을 때)
 	 */
 	while(!isEmpty(Q.rear-Q.front+1)){
-		if(dirp==NULL)
+		if(dirp==NULL){
+			dequeue_for_Size(&Q);
+			dirp=opendir(Q.pathptr[Q.front]);
 			continue;
-		if((dir=readdir(dirp))!=NULL){		//다음 dir로 이동
+		}
+		else if((dir=readdir(dirp))!=NULL){		//다음 dir로 이동
 			if(strcmp(dir->d_name,".")!=0&&strcmp(dir->d_name,"..")!=0){
 
 			/*absPath = dir의 절대경로*/
@@ -518,8 +521,8 @@ int Bfs_for_Size(char* absPath){
 		}
       	else{										//dp가 NULL일 경우
 			/*front갱신 후 디렉토리 변경*/
-				dequeue_for_Size(&Q);
-			dirp=opendir(Q.pathptr[Q.front])
+			dequeue_for_Size(&Q);
+			dirp=opendir(Q.pathptr[Q.front]);
 		}
 	}
 
