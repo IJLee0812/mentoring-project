@@ -73,14 +73,14 @@ void pop(Stack*);
 
 //지우
 //CO
-char* extract_Filename(char*); //argv[2]에서 파일명/디렉토리명만 추출
-char* set_Parentdir_Path(char*); //현재 디렉토리를 기준으로 부모 디렉토리의 경로를 설정
-void before_Search(char*, char*, int); //탐색 전, 일정 기준(탐색o/x, 상대/절대경로, BFS/DFS)별로 탐색 방법을 결정
+char* extract_Filename(char*);
+char* set_Parentdir_Path(char*);
+void before_Search(char*, char*, int);
 //BFS
-_Bool isEmpty(int); //큐가 비어있는지 아닌지 확인
-void enQue_for_Path(QUE*, struct NODE*); //큐의 끝에 노드를 in
-void deQue_for_Path(QUE*); //큐의 front를 out
-struct NODE* create_NODE(DIR* dp, char* Nname); //노드를 만들고 데이터 초기화
-void Bfs_for_Path(char* toFind, char* workDir); //BFS로 toFind의 위치를 찾아 경로 출력
+_Bool isEmpty(int);
+void enQue_for_Path(QUE*, struct NODE*);
+void deQue_for_Path(QUE*);
+struct NODE* create_NODE(DIR* dp, char* Nname);
+void Bfs_for_Path(char* toFind, char* workDir);
 //DFS
-void Dfs_for_Path(char*, char*); //DFS로 toFind의 위치를 찾아 경로 출력
+void Dfs_for_Path(char*, char*);
