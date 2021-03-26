@@ -45,9 +45,9 @@ typedef struct Queue{ //argv[2]
 
 //익준
 //CO
-void init(char *); //use: main //init workdir
-void selectmod(char *, int); //use: main
-char *strrev(char *); //reverse str
+void init(char *);
+void selectmod(char *, int);
+char *strrev(char *);
 //BFS
 void Bfs_for_SearchTree(char *, char *); 
 int havedir(char *); 
