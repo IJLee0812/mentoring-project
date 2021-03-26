@@ -361,17 +361,6 @@ void bfs_or_dfs (char* absPath,int BD){
 }
 
 /*
-void printSt(Stack* s){
-	NODE* horse = s->top;
-	while(horse!=NULL){
-		printf("horse->Nname: %s\n", horse->Nname);
-		printf("horse->size: %d\n", s->size);
-		horse=horse->next;
-	}
-}
-*/
-
-/*
 	#함수 설명 : 해당 디렉토리 내의 모든 파일크기를 DFS로 탐색하여 총합을 리턴
 	#변수 : char* absPath - 크기를 구할 디렉토리의 절대 경로
 	#리턴값 : 해당 디렉토리 내의 모든 파일크기 합
