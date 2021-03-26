@@ -306,7 +306,7 @@ char* absolute(char* path){
 	int intbuf;
 
 	/*path 문자열 처리*/
-	if(path[0]=='/')								//path==절대경로
+	if(path[0]=='/')									//path==절대경로
 		strcpy(absPath,path);
 	else{											//path==상대경로
 		getcwd(absPath,MAX);
@@ -335,7 +335,6 @@ char* absolute(char* path){
 		}
 	}
 
-	//printf("absPath: %s\n", absPath);
 	return absPath;
 }
 
@@ -392,32 +391,28 @@ int Dfs_for_Size(char* absPath){
 		(하위 디렉토리를 다 읽었을 때)
 	 */
 	while(st.size){										//모든 디렉토리가 스택에서 pop되면 종료
-		//printf("st.top->Nname: %s, st.size: %d\n", st.top->Nname, st.size);
 		if((dir=readdir(st.top->dp))!=NULL){
 			if(strcmp(dir->d_name,".")!=0&&strcmp(dir->d_name,"..")!=0){
+				/*탐색 디렉토리 문자열 처리*/
+       		     		strcpy(absPath, st.top->Nname);
+	  			if(absPath[strlen(absPath)-1]!='/')
+	                		strcat(absPath,"/");
+	            		strcat(absPath,dir->d_name);
 
-			/*탐색 디렉토리 문자열 처리*/
-            strcpy(absPath, st.top->Nname);
-			if(absPath[strlen(absPath)-1]!='/')
-	            strcat(absPath,"/");
-            strcat(absPath,dir->d_name);
+        	    		stat(absPath,&stbuf);	//탐색 디렉토리 정보 불러오기
 
-            stat(absPath,&stbuf);	//탐색 디렉토리 정보 불러오기
-
-            if((stbuf.st_mode&0xF000)==0x8000){		//dir이 파일일 경우
-//				printf("File\n");
-				totalSize += stbuf.st_size;
-             }
-            else{									//dir이 디렉토리일 경우
-//				printf("Dir\n");
-				if((openable = opendir(absPath))!=NULL)
-            		push(&st,initNODE(openable,absPath,NULL));
-			}
+            			if((stbuf.st_mode&0xF000)==0x8000){		//dir이 파일일 경우
+					totalSize += stbuf.st_size;
+             			}
+            			else{									//dir이 디렉토리일 경우
+					if((openable = opendir(absPath))!=NULL)
+            					push(&st,initNODE(openable,absPath,NULL));
+				}
 			}
 
 		}
 		else											//dir이 NULL일 경우
-        	pop(&st); /*top을 이전에 읽던 디렉토리로 변경*/
+        		pop(&st); /*top을 이전에 읽던 디렉토리로 변경*/
 	}
 
 	return totalSize;
@@ -433,9 +428,8 @@ void push(Stack *s, NODE* n){
 
 	tmp = s->top;
 	s->top = n;
-    s->top->next = tmp;
+    	s->top->next = tmp;
 	s->size++;
-	//printf("Push! %s\n", s->top->Nname);
 }
 
 /*
@@ -463,7 +457,6 @@ void pop(Stack *s){
 
    tmp = s->top;
    s->top = s->top->next;
-	//printf("Pop! %s\n\n", tmp->Nname);
    free(tmp);
    s->size--;
 }
@@ -508,24 +501,23 @@ int Bfs_for_Size(char* absPath){
 		}
 		else if((dir=readdir(dirp))!=NULL){		//다음 dir로 이동
 			if(strcmp(dir->d_name,".")!=0&&strcmp(dir->d_name,"..")!=0){
-
 			/*absPath = dir의 절대경로*/
-            strcpy(absPath, Q.pathptr[Q.front]);
+            		strcpy(absPath, Q.pathptr[Q.front]);
 			if(absPath[strlen(absPath)-1]!='/')
-	            strcat(absPath,"/");
-            strcat(absPath,dir->d_name);
+	            		strcat(absPath,"/");
+            		strcat(absPath,dir->d_name);
+
 			/*dir의 stat 불러오기*/
-            stat(absPath,&stbuf);
+            		stat(absPath,&stbuf);
 
-            if((stbuf.st_mode&0xF000)==0x8000){		//dir이 파일일 경우
+            		if((stbuf.st_mode&0xF000)==0x8000){		//dir이 파일일 경우
 				totalSize += stbuf.st_size;
-             }
-            else									//dir이 디렉토리일 경우
-               	enqueue_for_Size(&Q,absPath);
+             		}
+            		else						//dir이 디렉토리일 경우
+               			enqueue_for_Size(&Q,absPath);
 			}
-
 		}
-      	else{										//dp가 NULL일 경우
+      		else{							//dp가 NULL일 경우
 			/*front갱신 후 디렉토리 변경*/
 			dequeue_for_Size(&Q);
 			dirp=opendir(Q.pathptr[Q.front]);
@@ -542,13 +534,11 @@ int Bfs_for_Size(char* absPath){
 	#리턴값 : void
 */
 void enqueue_for_Size(Queue *q, char* newpath){
-
 	if(isFull(q))
 	   expand_Capacity(q);
 
 	q->rear = (q->rear+1)%q->capacity;
 	strcpy(q->pathptr[q->rear],newpath);
-
 }
 
 /*
@@ -557,7 +547,6 @@ void enqueue_for_Size(Queue *q, char* newpath){
 	#리턴값 : void
 */
 void dequeue_for_Size(Queue *q){
-
 	if(isEmpty(q->rear-q->front+1)){
 		printf("queue is already empty!!\n");
 		return;
