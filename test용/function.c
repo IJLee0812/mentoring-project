@@ -617,7 +617,7 @@ void expand_Capacity(Queue* q){
 	#변수 : char *name - 찾을 디렉터리명(경로)
 	#리턴값 : void
 */
-void init(char *name){ // 탐색할 디렉터리 이름(또는 경로), 탐색 시작 절대경로(프로그램 위치)출력
+void init(char *name){ 
 	printf("탐색할 디렉터리 이름(경로) : %s\n", name);
 	return;
 }
