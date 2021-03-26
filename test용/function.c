@@ -714,7 +714,7 @@ void Bfs_for_SearchTree(char *name, char *wd){
 		}
 		// 같은 깊이의 모든 노드들의 탐색이 끝난 경우
 		if (front == rear){
-			printf("Queue us Empty.(DIR not found) Program terminated!\n");
+			printf("Queue s Empty.(DIR not found) Program terminated!\n");
 			return;
 		}
 		else
